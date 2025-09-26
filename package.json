@@ -1,0 +1,26 @@
+{
+  "name": "conf-form-error-reporting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "console-error-monitor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/therealspark9/conf-form-error-reporting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/therealspark9/conf-form-error-reporting/issues"
+  },
+  "homepage": "https://github.com/therealspark9/conf-form-error-reporting#readme",
+  "dependencies": {
+    "node-cron": "^4.2.1",
+    "puppeteer": "^24.22.3",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}
