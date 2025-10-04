@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-09-26T11:40:19.490Z",
+  "summary": {
+    "totalUrlsScanned": 3,
+    "uniqueErrors": 0,
+    "totalOccurrences": 0,
+    "affectedPages": 0,
+    "errorRate": 0
+  },
+  "errors": [],
+  "urlErrors": []
+}

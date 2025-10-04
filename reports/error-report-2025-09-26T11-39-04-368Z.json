@@ -1,0 +1,111 @@
+{
+  "timestamp": "2025-09-26T11:39:04.390Z",
+  "summary": {
+    "totalUrlsScanned": 8,
+    "uniqueErrors": 1,
+    "totalOccurrences": 7,
+    "affectedPages": 5,
+    "errorRate": 62.5
+  },
+  "errors": [
+    {
+      "normalizedKey": "Failed to load resource: the server responded with a status of [NUMBER] ()",
+      "message": "Failed to load resource: the server responded with a status of 500 ()",
+      "occurrences": 7,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/dropbox-beta-program",
+        "https://www.salesforce.com/form/signup/conf/emergency-response",
+        "https://www.salesforce.com/form/signup/conf/freetrial-elf-v2-hp",
+        "https://www.salesforce.com/form/signup/conf/freetrial-elf-v2",
+        "https://www.salesforce.com/form/signup/conf/freetrial-service-elf-v2"
+      ],
+      "firstSeen": "2025-09-26T11:39:00.203Z",
+      "lastSeen": "2025-09-26T11:39:04.085Z",
+      "details": {
+        "text": "Failed to load resource: the server responded with a status of 500 ()",
+        "location": {
+          "url": "https://www.salesforce.com/form/signup/conf/dropbox-beta-program"
+        },
+        "args": []
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/dropbox-beta-program",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/signup/conf/dropbox-beta-program"
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/emergency-response",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/signup/conf/emergency-response"
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/freetrial-elf-v2-hp",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 500 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/signup/conf/freetrial-elf-v2-hp/"
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/freetrial-elf-v2",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/signup/conf/freetrial-elf-v2/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/freetrial-service-elf-v2",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/signup/conf/freetrial-service-elf-v2/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    }
+  ]
+}

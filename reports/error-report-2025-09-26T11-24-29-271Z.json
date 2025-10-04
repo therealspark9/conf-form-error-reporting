@@ -1,0 +1,891 @@
+{
+  "timestamp": "2025-09-26T11:24:29.292Z",
+  "summary": {
+    "totalUrlsScanned": 60,
+    "uniqueErrors": 3,
+    "totalOccurrences": 75,
+    "affectedPages": 42,
+    "errorRate": 70
+  },
+  "errors": [
+    {
+      "normalizedKey": "Failed to load resource: the server responded with a status of [NUMBER] ()",
+      "message": "Failed to load resource: the server responded with a status of 404 ()",
+      "occurrences": 67,
+      "affectedUrls": [
+        "https://www.salesforce.com/en-US/form/trial/conf/asyncconf",
+        "https://www.salesforce.com/form/contact/conf/asyncconf?locale=en-US",
+        "https://www.salesforce.com/form/demo/conf/asyncconf?locale=en-US",
+        "https://www.salesforce.com/en-US/form/demo/conf/asyncconf",
+        "https://www.salesforce.com/en-US/form/signup/conf/asyncconf",
+        "https://www.salesforce.com/form/contact/conf/asyncconf",
+        "https://www.salesforce.com/form/demo/conf/asyncconf",
+        "https://www.salesforce.com/en-US/form/contact/conf/asyncconf",
+        "https://www.salesforce.com/form/webinar/conf/asyncconf?locale=en-US",
+        "https://www.salesforce.com/form/trial/conf/asyncconf?locale=en-US",
+        "https://www.salesforce.com/form/agentforce/conf?locale=en-US",
+        "https://www.salesforce.com/form/agentforce/conf",
+        "https://www.salesforce.com/en-US/form/webinar/conf/asyncconf",
+        "https://www.salesforce.com/form/webinar/conf/asyncconf",
+        "https://www.salesforce.com/en-US/form/commerce/conf",
+        "https://www.salesforce.com/en-US/form/agentforce/conf",
+        "https://www.salesforce.com/form/trial/conf/asyncconf",
+        "https://www.salesforce.com/form/datorama/conf?locale=en-US",
+        "https://www.salesforce.com/en-US/form/datorama/conf",
+        "https://www.salesforce.com/en-US/form/digital-360/conf",
+        "https://www.salesforce.com/en-US/form/compare/conf",
+        "https://www.salesforce.com/form/datorama/conf",
+        "https://www.salesforce.com/en-US/form/experience/conf",
+        "https://www.salesforce.com/en-US/form/event/conf",
+        "https://www.salesforce.com/en-US/form/experience-cloud/conf",
+        "https://www.salesforce.com/en-US/form/dreamforce/conf",
+        "https://www.salesforce.com/form/marketing-cloud/conf?locale=en-US",
+        "https://www.salesforce.com/en-US/form/sc/conf",
+        "https://www.salesforce.com/form/sc/conf?locale=en-US",
+        "https://www.salesforce.com/en-US/form/marketing/conf",
+        "https://www.salesforce.com/en-US/form/marketing-cloud/conf",
+        "https://www.salesforce.com/form/sc/conf",
+        "https://www.salesforce.com/form/marketing-cloud/conf",
+        "https://www.salesforce.com/en-US/form/signup/conf",
+        "https://www.salesforce.com/en-US/form/pardot/conf",
+        "https://www.salesforce.com/en-US/form/salesforcemaps/conf",
+        "https://www.salesforce.com/form/salesforcemaps/conf",
+        "https://www.salesforce.com/form/salesforcemaps/conf?locale=en-US"
+      ],
+      "firstSeen": "2025-09-26T11:23:07.824Z",
+      "lastSeen": "2025-09-26T11:24:28.831Z",
+      "details": {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://www.salesforce.com/en-US/form/trial/conf/asyncconf/"
+        },
+        "args": []
+      }
+    },
+    {
+      "normalizedKey": "digitalData.util.saveLocalStorage is not a function",
+      "message": "digitalData.util.saveLocalStorage is not a function",
+      "occurrences": 4,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/compare/conf?locale=en-US",
+        "https://www.salesforce.com/form/compare/conf",
+        "https://www.salesforce.com/form/experience/conf?locale=en-US",
+        "https://www.salesforce.com/form/experience/conf"
+      ],
+      "firstSeen": "2025-09-26T11:23:42.381Z",
+      "lastSeen": "2025-09-26T11:24:12.231Z",
+      "details": {
+        "text": "digitalData.util.saveLocalStorage is not a function",
+        "stack": "TypeError: digitalData.util.saveLocalStorage is not a function\n    at SfdcWwwBase.gdpr.postInit (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:6:63)\n    at <anonymous> (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:7:74)\n    at l (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:99:93)\n    at fireWith (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:100:343)\n    at ready (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:104:123)\n    at q (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:24:96)",
+        "type": "pageerror"
+      }
+    },
+    {
+      "normalizedKey": "Cannot read properties of undefined (reading 'indexOf')",
+      "message": "Cannot read properties of undefined (reading 'indexOf')",
+      "occurrences": 4,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/compare/conf?locale=en-US",
+        "https://www.salesforce.com/form/compare/conf",
+        "https://www.salesforce.com/form/experience/conf?locale=en-US",
+        "https://www.salesforce.com/form/experience/conf"
+      ],
+      "firstSeen": "2025-09-26T11:23:42.381Z",
+      "lastSeen": "2025-09-26T11:24:12.231Z",
+      "details": {
+        "text": "Cannot read properties of undefined (reading 'indexOf')",
+        "location": {
+          "url": "https://s.go-mpulse.net/boomerang/NCPYV-VGJPP-N4J93-8HN3B-8B6S3",
+          "lineNumber": 9,
+          "columnNumber": 189290
+        },
+        "args": [
+          "JSHandle:Cannot read properties of undefined (reading 'indexOf')"
+        ]
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.salesforce.com/en-US/form/trial/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/trial/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/contact/conf/asyncconf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/demo/conf/asyncconf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/demo/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/demo/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/signup/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/signup/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/contact/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/contact/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/demo/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/demo/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/contact/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/contact/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/webinar/conf/asyncconf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/trial/conf/asyncconf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/agentforce/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/agentforce/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/agentforce/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/webinar/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/webinar/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/webinar/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/webinar/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/commerce/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/commerce/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/agentforce/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/agentforce/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/trial/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/trial/conf/asyncconf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/compare/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "digitalData.util.saveLocalStorage is not a function",
+          "stack": "TypeError: digitalData.util.saveLocalStorage is not a function\n    at SfdcWwwBase.gdpr.postInit (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:6:63)\n    at <anonymous> (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:7:74)\n    at l (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:99:93)\n    at fireWith (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:100:343)\n    at ready (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:104:123)\n    at q (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:24:96)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Cannot read properties of undefined (reading 'indexOf')",
+          "location": {
+            "url": "https://s.go-mpulse.net/boomerang/NCPYV-VGJPP-N4J93-8HN3B-8B6S3",
+            "lineNumber": 9,
+            "columnNumber": 189290
+          },
+          "args": [
+            "JSHandle:Cannot read properties of undefined (reading 'indexOf')"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/compare/conf",
+      "errors": [
+        {
+          "text": "digitalData.util.saveLocalStorage is not a function",
+          "stack": "TypeError: digitalData.util.saveLocalStorage is not a function\n    at SfdcWwwBase.gdpr.postInit (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:6:63)\n    at <anonymous> (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:7:74)\n    at l (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:99:93)\n    at fireWith (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:100:343)\n    at ready (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:104:123)\n    at q (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:24:96)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Cannot read properties of undefined (reading 'indexOf')",
+          "location": {
+            "url": "https://s.go-mpulse.net/boomerang/NCPYV-VGJPP-N4J93-8HN3B-8B6S3",
+            "lineNumber": 9,
+            "columnNumber": 189290
+          },
+          "args": [
+            "JSHandle:Cannot read properties of undefined (reading 'indexOf')"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/datorama/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/datorama/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/datorama/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/digital-360/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/digital-360/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/compare/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/compare/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/datorama/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/datorama/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/experience/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/experience/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/event/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/event/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/experience-cloud/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/experience-cloud/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/dreamforce/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/dreamforce/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/marketing-cloud/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/experience/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "digitalData.util.saveLocalStorage is not a function",
+          "stack": "TypeError: digitalData.util.saveLocalStorage is not a function\n    at SfdcWwwBase.gdpr.postInit (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:6:63)\n    at <anonymous> (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:7:74)\n    at l (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:99:93)\n    at fireWith (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:100:343)\n    at ready (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:104:123)\n    at q (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:24:96)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Cannot read properties of undefined (reading 'indexOf')",
+          "location": {
+            "url": "https://s.go-mpulse.net/boomerang/NCPYV-VGJPP-N4J93-8HN3B-8B6S3",
+            "lineNumber": 9,
+            "columnNumber": 189290
+          },
+          "args": [
+            "JSHandle:Cannot read properties of undefined (reading 'indexOf')"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/experience/conf",
+      "errors": [
+        {
+          "text": "digitalData.util.saveLocalStorage is not a function",
+          "stack": "TypeError: digitalData.util.saveLocalStorage is not a function\n    at SfdcWwwBase.gdpr.postInit (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:6:63)\n    at <anonymous> (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_analytics_top.min.js:7:74)\n    at l (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:99:93)\n    at fireWith (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:100:343)\n    at ready (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:104:123)\n    at q (https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/sfdc_jquery.min.js:24:96)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Cannot read properties of undefined (reading 'indexOf')",
+          "location": {
+            "url": "https://s.go-mpulse.net/boomerang/NCPYV-VGJPP-N4J93-8HN3B-8B6S3",
+            "lineNumber": 9,
+            "columnNumber": 189290
+          },
+          "args": [
+            "JSHandle:Cannot read properties of undefined (reading 'indexOf')"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/sc/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/sc/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/sc/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/marketing/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/marketing/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/marketing-cloud/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/marketing-cloud/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/sc/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/sc/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/marketing-cloud/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/marketing-cloud/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/signup/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/signup/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/pardot/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/pardot/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/en-US/form/salesforcemaps/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/en-US/form/salesforcemaps/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/salesforcemaps/conf",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/salesforcemaps/conf/"
+          },
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/salesforcemaps/conf?locale=en-US",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "args": []
+        }
+      ]
+    }
+  ]
+}
