@@ -10,7 +10,7 @@ class ConsoleErrorMonitor {
   constructor(config = {}) {
     this.config = {
       baseUrls: config.baseUrls || ['https://www.salesforce.com'],
-      confPatterns: config.confPatterns || ['/conf/', '/confirmation/', '/asyncconf'],
+      confPatterns: config.confPatterns || ['/form', '/conf/', '/confirmation/', '/asyncconf'],
       locales: config.locales || ['en-US'],
       maxConcurrent: config.maxConcurrent || 10,
       timeout: config.timeout || 30000,
@@ -31,7 +31,7 @@ class ConsoleErrorMonitor {
     const paths = [
       '/form/signup/conf/asyncconf',
       '/form/signup/conf/freetrial-conf-lb',
-      '/form/signup/',
+      '/form/developer-signup/',
       /* '/form/signup/conf/dropbox-beta-program',
       '/form/signup/conf/emergency-response',
       '/form/signup/conf/freetrial-elf-v2',
@@ -66,10 +66,24 @@ class ConsoleErrorMonitor {
         
         // Set up console error listener
         page.on('console', msg => {
-          if (msg.type() === 'error') {
+          const msgType = msg.type();
+          const msgText = msg.text();
+
+          // Capture all error, warning, and info messages
+          if (
+            msgType === 'error' ||
+            msgType === 'warning' ||
+            msgType === 'info' ||
+            (
+              // Explicitly match CORS and ReferenceError patterns
+              /Cross-Origin Request Blocked/i.test(msgText) ||
+              /ReferenceError: coveoua is not defined/i.test(msgText)
+            )
+          ) {
             errors.push({
-              text: msg.text(),
+              text: msgText,
               location: msg.location(),
+              type: msgType,
               args: msg.args().map(arg => arg.toString())
             });
           }
@@ -629,7 +643,7 @@ async function main() {
       'https://www.salesforce.com',
       // Add more base URLs here
     ],
-    confPatterns: ['/conf/', '/confirmation/', '/asyncconf'],
+    confPatterns: ['/form','/conf/', '/confirmation/', '/asyncconf'],
     locales: ['en-US'],
     maxConcurrent: 10,
     timeout: 30000,
