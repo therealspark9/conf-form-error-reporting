@@ -1,0 +1,280 @@
+{
+  "timestamp": "2025-10-15T11:21:21.637Z",
+  "summary": {
+    "totalUrlsScanned": 3,
+    "uniqueErrors": 6,
+    "totalOccurrences": 10,
+    "affectedPages": 2,
+    "errorRate": 66.66666666666666
+  },
+  "errors": [
+    {
+      "normalizedKey": "Browser Web Storage initialized for page_builder_miaw_ui.",
+      "message": "Browser Web Storage initialized for page_builder_miaw_ui.",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/asyncconf"
+      ],
+      "firstSeen": "2025-10-15T11:21:21.111Z",
+      "lastSeen": "2025-10-15T11:21:21.111Z",
+      "details": {
+        "text": "Browser Web Storage initialized for page_builder_miaw_ui.",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:Browser Web Storage initialized for page_builder_miaw_ui."
+        ]
+      }
+    },
+    {
+      "normalizedKey": "CONFIG_SIGNATURE set in localStorage",
+      "message": "CONFIG_SIGNATURE set in localStorage",
+      "occurrences": 2,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/asyncconf",
+        "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb"
+      ],
+      "firstSeen": "2025-10-15T11:21:21.111Z",
+      "lastSeen": "2025-10-15T11:21:21.407Z",
+      "details": {
+        "text": "CONFIG_SIGNATURE set in localStorage",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:CONFIG_SIGNATURE set in localStorage"
+        ]
+      }
+    },
+    {
+      "normalizedKey": "Configuration signature set: [NUMBER]D[NUMBER]|[URL]",
+      "message": "Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com",
+      "occurrences": 2,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/asyncconf",
+        "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb"
+      ],
+      "firstSeen": "2025-10-15T11:21:21.111Z",
+      "lastSeen": "2025-10-15T11:21:21.407Z",
+      "details": {
+        "text": "Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com"
+        ]
+      }
+    },
+    {
+      "normalizedKey": "Creating React root and rendering app.",
+      "message": "Creating React root and rendering app.",
+      "occurrences": 2,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/asyncconf",
+        "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb"
+      ],
+      "firstSeen": "2025-10-15T11:21:21.111Z",
+      "lastSeen": "2025-10-15T11:21:21.407Z",
+      "details": {
+        "text": "Creating React root and rendering app.",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:Creating React root and rendering app."
+        ]
+      }
+    },
+    {
+      "normalizedKey": "ACTIVE_PROVIDER set in localStorage",
+      "message": "ACTIVE_PROVIDER set in localStorage",
+      "occurrences": 2,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/asyncconf",
+        "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb"
+      ],
+      "firstSeen": "2025-10-15T11:21:21.111Z",
+      "lastSeen": "2025-10-15T11:21:21.407Z",
+      "details": {
+        "text": "ACTIVE_PROVIDER set in localStorage",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:ACTIVE_PROVIDER set in localStorage"
+        ]
+      }
+    },
+    {
+      "normalizedKey": "Discovered and set storage key for page_builder_miaw_ui.",
+      "message": "Discovered and set storage key for page_builder_miaw_ui.",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb"
+      ],
+      "firstSeen": "2025-10-15T11:21:21.407Z",
+      "lastSeen": "2025-10-15T11:21:21.407Z",
+      "details": {
+        "text": "Discovered and set storage key for page_builder_miaw_ui.",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+        ]
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Browser Web Storage initialized for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Browser Web Storage initialized for page_builder_miaw_ui."
+          ]
+        },
+        {
+          "text": "CONFIG_SIGNATURE set in localStorage",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:CONFIG_SIGNATURE set in localStorage"
+          ]
+        },
+        {
+          "text": "Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com"
+          ]
+        },
+        {
+          "text": "Creating React root and rendering app.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Creating React root and rendering app."
+          ]
+        },
+        {
+          "text": "ACTIVE_PROVIDER set in localStorage",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:ACTIVE_PROVIDER set in localStorage"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb",
+      "errors": [
+        {
+          "text": "Discovered and set storage key for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+          ]
+        },
+        {
+          "text": "CONFIG_SIGNATURE set in localStorage",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:CONFIG_SIGNATURE set in localStorage"
+          ]
+        },
+        {
+          "text": "Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Configuration signature set: 00D000000000062|https://org62.my.salesforce-scrt.com"
+          ]
+        },
+        {
+          "text": "Creating React root and rendering app.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Creating React root and rendering app."
+          ]
+        },
+        {
+          "text": "ACTIVE_PROVIDER set in localStorage",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:ACTIVE_PROVIDER set in localStorage"
+          ]
+        }
+      ]
+    }
+  ]
+}
