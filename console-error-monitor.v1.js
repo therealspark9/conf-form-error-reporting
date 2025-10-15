@@ -10,7 +10,7 @@ class ConsoleErrorMonitor {
   constructor(config = {}) {
     this.config = {
       baseUrls: config.baseUrls || ['https://www.salesforce.com'],
-      confPatterns: config.confPatterns || ['/form', '/conf/', '/confirmation/', '/asyncconf'],
+      confPatterns: config.confPatterns || ['/form', '/conf/', '/asyncconf'],
       locales: config.locales || ['en-US'],
       maxConcurrent: config.maxConcurrent || 10,
       timeout: config.timeout || 30000,
@@ -32,6 +32,9 @@ class ConsoleErrorMonitor {
       '/form/signup/conf/asyncconf',
       '/form/signup/conf/freetrial-conf-lb',
       '/form/developer-signup/',
+      '/form/contact/ohana-floor-request-sydney',
+      '/form/other/role-based-newsletter.html',
+      '/form/af25-save-the-date/',
       /* '/form/signup/conf/dropbox-beta-program',
       '/form/signup/conf/emergency-response',
       '/form/signup/conf/freetrial-elf-v2',
@@ -643,7 +646,7 @@ async function main() {
       'https://www.salesforce.com',
       // Add more base URLs here
     ],
-    confPatterns: ['/form','/conf/', '/confirmation/', '/asyncconf'],
+    confPatterns: ['/form','/conf/', '/asyncconf'],
     locales: ['en-US'],
     maxConcurrent: 10,
     timeout: 30000,
