@@ -9,9 +9,11 @@ puppeteer.use(StealthPlugin());
 class ConsoleErrorMonitor {
   constructor(config = {}) {
     this.config = {
-      baseUrls: config.baseUrls || ['https://www.salesforce.com'],
-      confPatterns: config.confPatterns || ['/form', '/conf/', '/asyncconf'],
-      locales: config.locales || ['en-US'],
+      //baseUrls: config.baseUrls || ['https://www.salesforce.com'],
+      baseUrls: config.baseUrls || ['https://www.jagran.com'],
+      //confPatterns: config.confPatterns || ['/form', '/conf/', '/asyncconf'],
+      confPatterns: config.confPatterns || ['/'],
+      locales: config.locales || ['hi-IN'],
       maxConcurrent: config.maxConcurrent || 10,
       timeout: config.timeout || 30000,
       outputDir: config.outputDir || './reports',
@@ -29,12 +31,14 @@ class ConsoleErrorMonitor {
     
     // Example URL patterns - customize based on your needs
     const paths = [
-      '/form/signup/conf/asyncconf',
+      '/'
+      /* '/form/signup/conf/asyncconf',
       '/form/signup/conf/freetrial-conf-lb',
       '/form/developer-signup/',
       '/form/contact/ohana-floor-request-sydney',
       '/form/other/role-based-newsletter.html',
-      '/form/af25-save-the-date/',
+      '/form/af25-save-the-date/', */
+
       /* '/form/signup/conf/dropbox-beta-program',
       '/form/signup/conf/emergency-response',
       '/form/signup/conf/freetrial-elf-v2',
@@ -75,7 +79,7 @@ class ConsoleErrorMonitor {
           // Capture all error, warning, and info messages
           if (
             msgType === 'error' ||
-            msgType === 'warning' ||
+            //msgType === 'warning' ||
             msgType === 'info' ||
             (
               // Explicitly match CORS and ReferenceError patterns
@@ -643,11 +647,14 @@ async function main() {
   // Configuration
   const config = {
     baseUrls: [
-      'https://www.salesforce.com',
+      //'https://www.salesforce.com',
+      'https://www.jagran.com',
       // Add more base URLs here
     ],
-    confPatterns: ['/form','/conf/', '/asyncconf'],
-    locales: ['en-US'],
+    //confPatterns: ['/form','/conf/', '/asyncconf'],
+    //locales: ['en-US'],
+    confPatterns: [''],
+    locales: ['hi-IN'],
     maxConcurrent: 10,
     timeout: 30000,
     outputDir: './reports',

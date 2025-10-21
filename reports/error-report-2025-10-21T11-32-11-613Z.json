@@ -1,0 +1,195 @@
+{
+  "timestamp": "2025-10-21T11:32:11.666Z",
+  "summary": {
+    "totalUrlsScanned": 1,
+    "uniqueErrors": 6,
+    "totalOccurrences": 9,
+    "affectedPages": 1,
+    "errorRate": 100
+  },
+  "errors": [
+    {
+      "normalizedKey": "Uncaught TypeError: Cannot read properties of undefined (reading 'useCanonical')",
+      "message": "Uncaught TypeError: Cannot read properties of undefined (reading 'useCanonical')",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.jagran.com/"
+      ],
+      "firstSeen": "2025-10-21T11:32:10.941Z",
+      "lastSeen": "2025-10-21T11:32:10.941Z",
+      "details": {
+        "text": "Uncaught TypeError: Cannot read properties of undefined (reading 'useCanonical')",
+        "stack": "Error: Uncaught TypeError: Cannot read properties of undefined (reading 'useCanonical')\n    at <anonymous> (https://static.chartbeat.com/js/chartbeat_mab.js:50:305)\n    at <anonymous> (https://static.chartbeat.com/js/chartbeat_mab.js:50:621)",
+        "type": "pageerror"
+      }
+    },
+    {
+      "normalizedKey": "Minified React error #[NUMBER]; visit [URL] for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.jagran.com/"
+      ],
+      "firstSeen": "2025-10-21T11:32:10.941Z",
+      "lastSeen": "2025-10-21T11:32:10.941Z",
+      "details": {
+        "text": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+        "stack": "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n    at rD (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:35023)\n    at oK (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:85062)\n    at uS (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:116205)\n    at <anonymous> (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:116050)\n    at uw (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:116058)\n    at uc (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:111433)\n    at uZ (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:134577)\n    at N (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:187886)",
+        "type": "pageerror"
+      }
+    },
+    {
+      "normalizedKey": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.jagran.com/"
+      ],
+      "firstSeen": "2025-10-21T11:32:10.941Z",
+      "lastSeen": "2025-10-21T11:32:10.941Z",
+      "details": {
+        "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+        "location": {
+          "url": "https://pixel.jagran.com/nofill/pixel.gif"
+        },
+        "type": "error",
+        "args": []
+      }
+    },
+    {
+      "normalizedKey": "SYNC.JS: Aborting due to error contacting Lotame's servers. Error reason was ''.",
+      "message": "SYNC.JS: Aborting due to error contacting Lotame's servers. Error reason was ''.",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.jagran.com/"
+      ],
+      "firstSeen": "2025-10-21T11:32:10.941Z",
+      "lastSeen": "2025-10-21T11:32:10.941Z",
+      "details": {
+        "text": "SYNC.JS: Aborting due to error contacting Lotame's servers. Error reason was ''.",
+        "location": {
+          "url": "https://tags.crwdcntrl.net/lt/c/16589/sync.min.js",
+          "lineNumber": 0,
+          "columnNumber": 10441
+        },
+        "type": "error",
+        "args": [
+          "JSHandle:SYNC.JS: Aborting due to error contacting Lotame's servers. Error reason was ''."
+        ]
+      }
+    },
+    {
+      "normalizedKey": "Failed to load resource: net::ERR_CONNECTION_RESET",
+      "message": "Failed to load resource: net::ERR_CONNECTION_RESET",
+      "occurrences": 4,
+      "affectedUrls": [
+        "https://www.jagran.com/"
+      ],
+      "firstSeen": "2025-10-21T11:32:10.941Z",
+      "lastSeen": "2025-10-21T11:32:10.941Z",
+      "details": {
+        "text": "Failed to load resource: net::ERR_CONNECTION_RESET",
+        "location": {
+          "url": "https://bcp.crwdcntrl.net/6/map?xcid=16589"
+        },
+        "type": "error",
+        "args": []
+      }
+    },
+    {
+      "normalizedKey": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.jagran.com/"
+      ],
+      "firstSeen": "2025-10-21T11:32:10.941Z",
+      "lastSeen": "2025-10-21T11:32:10.941Z",
+      "details": {
+        "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "location": {
+          "url": "https://cdn-ima.33across.com/ob.js"
+        },
+        "type": "error",
+        "args": []
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.jagran.com/",
+      "errors": [
+        {
+          "text": "Uncaught TypeError: Cannot read properties of undefined (reading 'useCanonical')",
+          "stack": "Error: Uncaught TypeError: Cannot read properties of undefined (reading 'useCanonical')\n    at <anonymous> (https://static.chartbeat.com/js/chartbeat_mab.js:50:305)\n    at <anonymous> (https://static.chartbeat.com/js/chartbeat_mab.js:50:621)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+          "stack": "Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.\n    at rD (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:35023)\n    at oK (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:85062)\n    at uS (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:116205)\n    at <anonymous> (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:116050)\n    at uw (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:116058)\n    at uc (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:111433)\n    at uZ (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:134577)\n    at N (https://www.jagran.com/_next/static/chunks/framework-441e7478c108e283.js:1:187886)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+          "location": {
+            "url": "https://pixel.jagran.com/nofill/pixel.gif"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "SYNC.JS: Aborting due to error contacting Lotame's servers. Error reason was ''.",
+          "location": {
+            "url": "https://tags.crwdcntrl.net/lt/c/16589/sync.min.js",
+            "lineNumber": 0,
+            "columnNumber": 10441
+          },
+          "type": "error",
+          "args": [
+            "JSHandle:SYNC.JS: Aborting due to error contacting Lotame's servers. Error reason was ''."
+          ]
+        },
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_RESET",
+          "location": {
+            "url": "https://bcp.crwdcntrl.net/6/map?xcid=16589"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_RESET",
+          "location": {
+            "url": "https://tpc.googlesyndication.com/simgad/10915671844837816082"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_RESET",
+          "location": {
+            "url": "https://tpc.googlesyndication.com/pagead/js/r20251020/r20110914/abg_lite_fy2021.js"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_RESET",
+          "location": {
+            "url": "https://tpc.googlesyndication.com/pagead/js/r20251020/r20110914/client/window_focus_fy2021.js"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+          "location": {
+            "url": "https://cdn-ima.33across.com/ob.js"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "timestamp": "2025-10-21T11:18:11.974Z",
+  "summary": {
+    "totalUrlsScanned": 6,
+    "uniqueErrors": 3,
+    "totalOccurrences": 7,
+    "affectedPages": 5,
+    "errorRate": 83.33333333333334
+  },
+  "errors": [
+    {
+      "normalizedKey": "Discovered and set storage key for page_builder_miaw_ui.",
+      "message": "Discovered and set storage key for page_builder_miaw_ui.",
+      "occurrences": 4,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/signup/conf/asyncconf",
+        "https://www.salesforce.com/form/other/role-based-newsletter.html",
+        "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb",
+        "https://www.salesforce.com/form/contact/ohana-floor-request-sydney"
+      ],
+      "firstSeen": "2025-10-21T11:18:10.809Z",
+      "lastSeen": "2025-10-21T11:18:10.938Z",
+      "details": {
+        "text": "Discovered and set storage key for page_builder_miaw_ui.",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+        ]
+      }
+    },
+    {
+      "normalizedKey": "Failed to load resource: the server responded with a status of [NUMBER] ()",
+      "message": "Failed to load resource: the server responded with a status of 404 ()",
+      "occurrences": 2,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/af25-save-the-date/"
+      ],
+      "firstSeen": "2025-10-21T11:18:10.867Z",
+      "lastSeen": "2025-10-21T11:18:10.867Z",
+      "details": {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://www.salesforce.com/form/af25-save-the-date/"
+        },
+        "type": "error",
+        "args": []
+      }
+    },
+    {
+      "normalizedKey": "Browser Web Storage initialized for page_builder_miaw_ui.",
+      "message": "Browser Web Storage initialized for page_builder_miaw_ui.",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/af25-save-the-date/"
+      ],
+      "firstSeen": "2025-10-21T11:18:10.867Z",
+      "lastSeen": "2025-10-21T11:18:10.867Z",
+      "details": {
+        "text": "Browser Web Storage initialized for page_builder_miaw_ui.",
+        "location": {
+          "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+          "lineNumber": 0,
+          "columnNumber": 4013
+        },
+        "type": "info",
+        "args": [
+          "JSHandle:Browser Web Storage initialized for page_builder_miaw_ui."
+        ]
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/asyncconf",
+      "errors": [
+        {
+          "text": "Discovered and set storage key for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/other/role-based-newsletter.html",
+      "errors": [
+        {
+          "text": "Discovered and set storage key for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/signup/conf/freetrial-conf-lb",
+      "errors": [
+        {
+          "text": "Discovered and set storage key for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/af25-save-the-date/",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/af25-save-the-date/"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Browser Web Storage initialized for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Browser Web Storage initialized for page_builder_miaw_ui."
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/contact/ohana-floor-request-sydney",
+      "errors": [
+        {
+          "text": "Discovered and set storage key for page_builder_miaw_ui.",
+          "location": {
+            "url": "https://c.salesforce.com/digital/@sfdc-www-emu/page-builder-miaw-ui/v1-stable/assets/__federation_shared_@sfdc-www-emu/af-client-lib-DyZOCx-q.js",
+            "lineNumber": 0,
+            "columnNumber": 4013
+          },
+          "type": "info",
+          "args": [
+            "JSHandle:Discovered and set storage key for page_builder_miaw_ui."
+          ]
+        }
+      ]
+    }
+  ]
+}
