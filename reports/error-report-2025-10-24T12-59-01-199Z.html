@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console Error Report - 2025-10-24T12:59:01.199Z</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+    }
+    h1 { font-size: 2em; margin-bottom: 10px; }
+    .meta {
+      display: flex;
+      gap: 30px;
+      margin-top: 15px;
+      opacity: 0.9;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 30px;
+      background: #fafafa;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .stat {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label {
+      color: #666;
+      margin-top: 5px;
+    }
+    .errors { padding: 30px; }
+    .error-group {
+      margin-bottom: 30px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .error-header {
+      background: #f8f8f8;
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s;
+    }
+    .error-header:hover { background: #f0f0f0; }
+    .error-title {
+      flex: 1;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em;
+      color: #d73027;
+      word-break: break-word;
+    }
+    .error-stats {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+    .badge.count {
+      background: #fee0e0;
+      color: #d73027;
+    }
+    .badge.urls {
+      background: #e0f0ff;
+      color: #2166ac;
+    }
+    .error-details {
+      padding: 20px;
+      background: #fafafa;
+      display: none;
+    }
+    .error-details.active { display: block; }
+    .url-list {
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .url-item {
+      padding: 8px 12px;
+      background: white;
+      margin-bottom: 5px;
+      border-radius: 4px;
+      border-left: 3px solid #667eea;
+      font-size: 0.9em;
+    }
+    .url-item a {
+      color: #2166ac;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .url-item a:hover { text-decoration: underline; }
+    .filter-bar {
+      padding: 20px 30px;
+      background: #fafafa;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    input[type="search"] {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+    select {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+      background: white;
+    }
+    .no-errors {
+      text-align: center;
+      padding: 60px 30px;
+      color: #666;
+    }
+    .no-errors svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      color: #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔍 Console Error Monitor Report</h1>
+      <div class="meta">
+        <div>📅 Generated: 10/24/2025, 6:29:01 PM</div>
+        <div>🌐 Total URLs Scanned: 0</div>
+        <div>⏱️ Next Run: 10/24/2025, 8:29:01 PM</div>
+      </div>
+    </header>
+    
+    <div class="summary">
+      <div class="stat">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Unique Errors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Total Occurrences</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Affected Pages</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">NaN%</div>
+        <div class="stat-label">Error Rate</div>
+      </div>
+    </div>
+    
+    <div class="filter-bar">
+      <input type="search" id="searchInput" placeholder="Search errors...">
+      <select id="sortSelect">
+        <option value="count">Sort by Count</option>
+        <option value="urls">Sort by URLs Affected</option>
+        <option value="recent">Sort by Most Recent</option>
+      </select>
+    </div>
+    
+    <div class="errors">
+      
+        <div class="no-errors">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h2>No Errors Found!</h2>
+          <p>All confirmation pages are running without console errors.</p>
+        </div>
+      
+    </div>
+  </div>
+  
+  <script>
+    function toggleDetails(index) {
+      const details = document.getElementById('details-' + index);
+      details.classList.toggle('active');
+    }
+    
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const errorGroups = document.querySelectorAll('.error-group');
+      
+      errorGroups.forEach(group => {
+        const errorText = group.dataset.error.toLowerCase();
+        const errorTitle = group.querySelector('.error-title').textContent.toLowerCase();
+        
+        if (errorText.includes(searchTerm) || errorTitle.includes(searchTerm)) {
+          group.style.display = 'block';
+        } else {
+          group.style.display = 'none';
+        }
+      });
+    });
+    
+    // Sort functionality
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      const sortBy = e.target.value;
+      const container = document.querySelector('.errors');
+      const errorGroups = Array.from(document.querySelectorAll('.error-group'));
+      
+      errorGroups.sort((a, b) => {
+        const aCount = parseInt(a.querySelector('.badge.count').textContent);
+        const bCount = parseInt(b.querySelector('.badge.count').textContent);
+        const aUrls = parseInt(a.querySelector('.badge.urls').textContent);
+        const bUrls = parseInt(b.querySelector('.badge.urls').textContent);
+        
+        switch(sortBy) {
+          case 'count': return bCount - aCount;
+          case 'urls': return bUrls - aUrls;
+          default: return 0;
+        }
+      });
+      
+      errorGroups.forEach(group => container.appendChild(group));
+    });
+  </script>
+</body>
+</html>

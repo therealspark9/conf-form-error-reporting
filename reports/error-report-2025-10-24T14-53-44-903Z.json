@@ -1,0 +1,99 @@
+{
+  "timestamp": "2025-10-24T14:53:44.922Z",
+  "summary": {
+    "totalUrlsScanned": 12,
+    "uniqueErrors": 1,
+    "totalOccurrences": 5,
+    "affectedPages": 4,
+    "errorRate": 33.33333333333333
+  },
+  "errors": [
+    {
+      "normalizedKey": "Failed to load resource: the server responded with a status of [NUMBER] ()",
+      "message": "Failed to load resource: the server responded with a status of 404 ()",
+      "occurrences": 5,
+      "affectedUrls": [
+        "https://www.salesforce.com/dk/form/pdf/idc-infobrief-nordics-public-sector",
+        "https://www.salesforce.com/dk/form/conf/idc-infobrief-nordics-public-sector",
+        "https://www.salesforce.com/dk/form/demo/conf/digital-government-demos",
+        "https://www.salesforce.com/dk/form/industries/connected-government-report"
+      ],
+      "firstSeen": "2025-10-24T14:53:30.254Z",
+      "lastSeen": "2025-10-24T14:53:44.263Z",
+      "details": {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://www.salesforce.com/L01KsCcGYO0bc/spot5TyS/OszvLA/uap9ab/aTsFSwE/cG/QVHi0oFRMp",
+          "lineNumber": 0
+        },
+        "type": "error",
+        "args": []
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.salesforce.com/dk/form/pdf/idc-infobrief-nordics-public-sector",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/L01KsCcGYO0bc/spot5TyS/OszvLA/uap9ab/aTsFSwE/cG/QVHi0oFRMp",
+            "lineNumber": 0
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/designs/sfdc-www/da_dk/favicon.ico"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/dk/form/conf/idc-infobrief-nordics-public-sector",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/L01KsCcGYO0bc/spot5TyS/OszvLA/uap9ab/aTsFSwE/cG/QVHi0oFRMp",
+            "lineNumber": 0
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/dk/form/demo/conf/digital-government-demos",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/demo/conf/digital-government-demos/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/dk/form/industries/connected-government-report",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/L01KsCcGYO0bc/spot5TyS/OszvLA/uap9ab/aTsFSwE/cG/QVHi0oFRMp",
+            "lineNumber": 0
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    }
+  ]
+}
