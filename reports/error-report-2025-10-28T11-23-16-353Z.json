@@ -1,0 +1,318 @@
+{
+  "timestamp": "2025-10-28T11:23:16.355Z",
+  "summary": {
+    "totalUrlsScanned": 4981,
+    "uniqueErrors": 3,
+    "totalOccurrences": 20,
+    "affectedPages": 15,
+    "errorRate": 0.3011443485243927
+  },
+  "errors": [
+    {
+      "normalizedKey": "Failed to load resource: the server responded with a status of [NUMBER] ()",
+      "message": "Failed to load resource: the server responded with a status of 404 ()",
+      "occurrences": 17,
+      "affectedUrls": [
+        "https://www.salesforce.com/dk/form/pdf/idc-infobrief-nordics-public-sector",
+        "https://www.salesforce.com/dk/form/conf/idc-infobrief-nordics-public-sector",
+        "https://www.salesforce.com/dk/form/demo/conf/digital-government-demos",
+        "https://www.salesforce.com/dk/form/industries/connected-government-report",
+        "https://www.salesforce.com/form/sales/change-is-hard",
+        "https://www.salesforce.com/form/sales/story-of-sales",
+        "https://www.salesforce.com/form/conf/app-cloud/cio-ebook",
+        "https://www.salesforce.com/form/app-cloud/it-agent-handbook",
+        "https://www.salesforce.com/form/marketingcloud/state-of-marketing-video",
+        "https://www.salesforce.com/form/marketingcloud/conf/interaction-studio-demo",
+        "https://www.salesforce.com/form/marketingcloud/conf/state-of-marketing-video",
+        "https://www.salesforce.com/form/marketingcloud/conf/webinar-second-party-data-revolution-evolution",
+        "https://www.salesforce.com/form/contact/work-cvs-health-partnership",
+        "https://www.salesforce.com/form/contact/essentials_error_1"
+      ],
+      "firstSeen": "2025-10-28T10:30:25.961Z",
+      "lastSeen": "2025-10-28T10:46:13.579Z",
+      "details": {
+        "text": "Failed to load resource: the server responded with a status of 404 ()",
+        "location": {
+          "url": "https://www.salesforce.com/Uyj8uEARZc-HSstEniaqWJitIug/VO/KGl3AQ/emxsFU/QKcj0p",
+          "lineNumber": 0
+        },
+        "type": "error",
+        "args": []
+      }
+    },
+    {
+      "normalizedKey": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "occurrences": 2,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/sales/gartner-mq-sfa-platforms-2022-report",
+        "https://www.salesforce.com/form/conf/app-cloud/cio-ebook"
+      ],
+      "firstSeen": "2025-10-28T10:33:43.054Z",
+      "lastSeen": "2025-10-28T10:34:53.468Z",
+      "details": {
+        "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+        "location": {
+          "url": "https://cdn.krxd.net/controltag/r2a052q1o.js"
+        },
+        "type": "error",
+        "args": []
+      }
+    },
+    {
+      "normalizedKey": "Unexpected token 'N', \"Not found \" is not valid JSON JSON.parse (<anonymous>)",
+      "message": "Unexpected token 'N', \"Not found\n\" is not valid JSON\nJSON.parse (<anonymous>)",
+      "occurrences": 1,
+      "affectedUrls": [
+        "https://www.salesforce.com/form/conf/app-cloud/cio-ebook"
+      ],
+      "firstSeen": "2025-10-28T10:34:53.468Z",
+      "lastSeen": "2025-10-28T10:34:53.468Z",
+      "details": {
+        "text": "Unexpected token 'N', \"Not found\n\" is not valid JSON\nJSON.parse (<anonymous>)",
+        "stack": "SyntaxError: Unexpected token 'N', \"Not found\n\" is not valid JSON\nJSON.parse (<anonymous>)\n    at s.onload (https://a.sfdcstatic.com/digital/one-trust/core/stable/scripttemplates/otSDKStub.js:2:12556)",
+        "type": "pageerror"
+      }
+    }
+  ],
+  "urlErrors": [
+    {
+      "url": "https://www.salesforce.com/dk/form/pdf/idc-infobrief-nordics-public-sector",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/Uyj8uEARZc-HSstEniaqWJitIug/VO/KGl3AQ/emxsFU/QKcj0p",
+            "lineNumber": 0
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/designs/sfdc-www/da_dk/favicon.ico"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/dk/form/conf/idc-infobrief-nordics-public-sector",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/Uyj8uEARZc-HSstEniaqWJitIug/VO/KGl3AQ/emxsFU/QKcj0p",
+            "lineNumber": 0
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/dk/form/demo/conf/digital-government-demos",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/demo/conf/digital-government-demos/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/dk/form/industries/connected-government-report",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/Uyj8uEARZc-HSstEniaqWJitIug/VO/KGl3AQ/emxsFU/QKcj0p",
+            "lineNumber": 0
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/sales/change-is-hard",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/sales/gartner-mq-sfa-platforms-2022-report",
+      "errors": [
+        {
+          "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+          "location": {
+            "url": "https://cdn.krxd.net/controltag/r2a052q1o.js"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/sales/story-of-sales",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/sales/story-of-sales/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/conf/app-cloud/cio-ebook",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://a.sfdcstatic.com/digital/one-trust/core/stable/consent/742a15b9-6aa4-4c2f-99c1-ad4ca220cf96/742a15b9-6aa4-4c2f-99c1-ad4ca220cf96.json"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Unexpected token 'N', \"Not found\n\" is not valid JSON\nJSON.parse (<anonymous>)",
+          "stack": "SyntaxError: Unexpected token 'N', \"Not found\n\" is not valid JSON\nJSON.parse (<anonymous>)\n    at s.onload (https://a.sfdcstatic.com/digital/one-trust/core/stable/scripttemplates/otSDKStub.js:2:12556)",
+          "type": "pageerror"
+        },
+        {
+          "text": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+          "location": {
+            "url": "https://cdn.krxd.net/controltag/rxr05acqt.js"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 403 ()",
+          "location": {
+            "url": "https://bam.nr-data.net/1/1c1a92ab77?a=2873335&v=1044.a6554e7&to=ZwcAZhdUCBVXUkNeXF5NKGE1GjEjdBx%2BeXUfCBFCSloICl9fUhhASREWVwgaCwlSRFtSQB89UgJQUwUJW1xYWRxEBw9CCVQSA0UeW1ZKXxcWHA9GFg%3D%3D&rst=14034&ref=https://www.salesforce.com/form/conf/app-cloud/cio-ebook/&ap=278&be=6634&fe=13814&dc=12362&af=err,xhr,stn,ins&perf=%7B%22timing%22:%7B%22of%22:1761647672455,%22n%22:0,%22r%22:1,%22re%22:677,%22f%22:677,%22dn%22:677,%22dne%22:677,%22c%22:677,%22ce%22:677,%22rq%22:678,%22rp%22:1946,%22rpe%22:1949,%22dl%22:2948,%22di%22:12352,%22ds%22:12352,%22de%22:12395,%22dc%22:13813,%22l%22:13813,%22le%22:13820%7D,%22navigation%22:%7B%22rc%22:1%7D%7D&jsonp=NREUM.setToken"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/app-cloud/it-agent-handbook",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/marketingcloud/state-of-marketing-video",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/marketingcloud/state-of-marketing-video/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/marketingcloud/conf/interaction-studio-demo",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/marketingcloud/conf/interaction-studio-demo/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/marketingcloud/conf/state-of-marketing-video",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/marketingcloud/conf/state-of-marketing-video/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/marketingcloud/conf/webinar-second-party-data-revolution-evolution",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/marketingcloud/conf/webinar-second-party-data-revolution-evolution/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/contact/work-cvs-health-partnership",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/contact/work-cvs-health-partnership/undefined/"
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    },
+    {
+      "url": "https://www.salesforce.com/form/contact/essentials_error_1",
+      "errors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/form/contact/essentials_error_1/"
+          },
+          "type": "error",
+          "args": []
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "location": {
+            "url": "https://www.salesforce.com/etc/clientlibs/sfdc-aem-master/clientlibs_www_tags.min.js",
+            "lineNumber": 1
+          },
+          "type": "error",
+          "args": []
+        }
+      ]
+    }
+  ]
+}
