@@ -17,8 +17,7 @@ class ConsoleErrorMonitor {
       retryLimit: config.retryLimit || 2
     };
     
-    this.errors = new Map();
-    this.urlErrors = new Map();
+    this.pageErrors = new Map(); // Changed: Store errors by page
     this.processedUrls = new Set();
   }
 
@@ -48,7 +47,6 @@ class ConsoleErrorMonitor {
         page = await browser.newPage();
         const errors = [];
         
-        // Updated console message handling
         page.on('console', msg => {
           try {
             const type = msg.type();
@@ -59,7 +57,7 @@ class ConsoleErrorMonitor {
                 text: text,
                 location: msg.location?.() || {},
                 type,
-                args: msg.args?.().map(arg => arg.toString()) || []
+                timestamp: new Date().toISOString()
               });
             }
           } catch (e) {
@@ -71,14 +69,22 @@ class ConsoleErrorMonitor {
           errors.push({
             text: error.message,
             stack: error.stack,
-            type: 'pageerror'
+            type: 'pageerror',
+            timestamp: new Date().toISOString()
           });
         });
         
         await page.goto(url, { waitUntil: 'networkidle2', timeout: this.config.timeout });
         await new Promise(resolve => setTimeout(resolve, 5000));
         
-        if (errors.length) this.storeErrors(url, errors);
+        // Store errors by page
+        this.pageErrors.set(url, {
+          url,
+          errorCount: errors.length,
+          errors: errors,
+          scannedAt: new Date().toISOString(),
+          success: true
+        });
         
         await page.close();
         return { url, success: true, errorCount: errors.length };
@@ -86,6 +92,17 @@ class ConsoleErrorMonitor {
         if (page) await page.close().catch(() => {});
         if (++retries > this.config.retryLimit) {
           console.error(`Failed to process ${url}: ${error.message}`);
+          
+          // Store failure info
+          this.pageErrors.set(url, {
+            url,
+            errorCount: 0,
+            errors: [],
+            scannedAt: new Date().toISOString(),
+            success: false,
+            failureReason: error.message
+          });
+          
           return { url, success: false, error: error.message };
         }
         await new Promise(resolve => setTimeout(resolve, 1000 * retries));
@@ -93,44 +110,6 @@ class ConsoleErrorMonitor {
     }
   }
 
-  // Store and group errors
-  storeErrors(url, errors) {
-    // Store URL-specific errors
-    this.urlErrors.set(url, errors);
-    
-    // Group similar errors
-    for (const error of errors) {
-      const errorKey = this.normalizeError(error.text);
-      
-      if (!this.errors.has(errorKey)) {
-        this.errors.set(errorKey, {
-          message: error.text,
-          urls: new Set(),
-          count: 0,
-          firstSeen: new Date(),
-          details: error
-        });
-      }
-      
-      const errorGroup = this.errors.get(errorKey);
-      errorGroup.urls.add(url);
-      errorGroup.count++;
-      errorGroup.lastSeen = new Date();
-    }
-  }
-
-  // Normalize error messages for grouping
-  normalizeError(errorText) {
-    return errorText
-      .replace(/https?:\/\/[^\s]+/g, '[URL]')
-      .replace(/\d+/g, '[NUMBER]')
-      .replace(/\s+/g, ' ')
-      .replace(/at line \d+:\d+/g, 'at line [LINE]')
-      .trim()
-      .substring(0, 200);
-  }
-
-  // Process URLs in batches
   async processUrls(urls) {
     const browser = await puppeteer.launch({
       headless: 'new',
@@ -148,12 +127,10 @@ class ConsoleErrorMonitor {
     const results = [];
     const batches = [];
     
-    // Create batches
     for (let i = 0; i < urls.length; i += this.config.maxConcurrent) {
       batches.push(urls.slice(i, i + this.config.maxConcurrent));
     }
     
-    // Process batches
     for (let i = 0; i < batches.length; i++) {
       console.log(`Processing batch ${i + 1}/${batches.length}`);
       
@@ -164,7 +141,6 @@ class ConsoleErrorMonitor {
       const batchResults = await Promise.allSettled(batchPromises);
       results.push(...batchResults.map(r => r.value || r.reason));
       
-      // Small delay between batches
       if (i < batches.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
@@ -174,11 +150,20 @@ class ConsoleErrorMonitor {
     return results;
   }
 
-  // Generate HTML report
   async generateHtmlReport() {
     const timestamp = new Date().toISOString();
-    const sortedErrors = Array.from(this.errors.entries())
-      .sort((a, b) => b[1].count - a[1].count);
+    
+    // Sort pages by error count (descending), then alphabetically
+    const sortedPages = Array.from(this.pageErrors.entries())
+      .sort((a, b) => {
+        if (b[1].errorCount !== a[1].errorCount) {
+          return b[1].errorCount - a[1].errorCount;
+        }
+        return a[0].localeCompare(b[0]);
+      });
+    
+    const totalErrors = sortedPages.reduce((sum, [, page]) => sum + page.errorCount, 0);
+    const pagesWithErrors = sortedPages.filter(([, page]) => page.errorCount > 0).length;
     
     const html = `
 <!DOCTYPE html>
@@ -215,6 +200,7 @@ class ConsoleErrorMonitor {
       gap: 30px;
       margin-top: 15px;
       opacity: 0.9;
+      flex-wrap: wrap;
     }
     .summary {
       display: grid;
@@ -240,74 +226,6 @@ class ConsoleErrorMonitor {
       color: #666;
       margin-top: 5px;
     }
-    .errors { padding: 30px; }
-    .error-group {
-      margin-bottom: 30px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .error-header {
-      background: #f8f8f8;
-      padding: 15px 20px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background 0.3s;
-    }
-    .error-header:hover { background: #f0f0f0; }
-    .error-title {
-      flex: 1;
-      font-family: 'Courier New', monospace;
-      font-size: 0.95em;
-      color: #d73027;
-      word-break: break-word;
-    }
-    .error-stats {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-    .badge {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.85em;
-      font-weight: bold;
-    }
-    .badge.count {
-      background: #fee0e0;
-      color: #d73027;
-    }
-    .badge.urls {
-      background: #e0f0ff;
-      color: #2166ac;
-    }
-    .error-details {
-      padding: 20px;
-      background: #fafafa;
-      display: none;
-    }
-    .error-details.active { display: block; }
-    .url-list {
-      margin-top: 15px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .url-item {
-      padding: 8px 12px;
-      background: white;
-      margin-bottom: 5px;
-      border-radius: 4px;
-      border-left: 3px solid #667eea;
-      font-size: 0.9em;
-    }
-    .url-item a {
-      color: #2166ac;
-      text-decoration: none;
-      word-break: break-all;
-    }
-    .url-item a:hover { text-decoration: underline; }
     .filter-bar {
       padding: 20px 30px;
       background: #fafafa;
@@ -315,31 +233,166 @@ class ConsoleErrorMonitor {
       display: flex;
       gap: 15px;
       align-items: center;
+      flex-wrap: wrap;
     }
     input[type="search"] {
       flex: 1;
+      min-width: 250px;
       padding: 10px 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 1em;
     }
-    select {
+    select, button {
       padding: 10px 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       font-size: 1em;
       background: white;
+      cursor: pointer;
     }
-    .no-errors {
+    button:hover {
+      background: #f0f0f0;
+    }
+    .pages { padding: 30px; }
+    .page-card {
+      margin-bottom: 25px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+    .page-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .page-card.no-errors {
+      border-color: #d1fae5;
+      background: #f0fdf4;
+    }
+    .page-card.has-errors {
+      border-color: #fecaca;
+    }
+    .page-card.failed {
+      border-color: #fed7aa;
+      background: #fffbeb;
+    }
+    .page-header {
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+    .page-card.no-errors .page-header {
+      background: #ecfdf5;
+    }
+    .page-card.has-errors .page-header {
+      background: #fef2f2;
+    }
+    .page-card.failed .page-header {
+      background: #fffbeb;
+    }
+    .page-header:hover {
+      opacity: 0.9;
+    }
+    .page-url {
+      flex: 1;
+      font-size: 0.95em;
+      word-break: break-all;
+      color: #2166ac;
+    }
+    .page-stats {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .badge.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .badge.errors {
+      background: #fee0e0;
+      color: #d73027;
+    }
+    .badge.failed {
+      background: #fed7aa;
+      color: #92400e;
+    }
+    .expand-icon {
+      transition: transform 0.3s;
+      font-size: 1.2em;
+      color: #666;
+    }
+    .expand-icon.active {
+      transform: rotate(180deg);
+    }
+    .page-details {
+      padding: 20px;
+      background: #fafafa;
+      display: none;
+      border-top: 1px solid #e0e0e0;
+    }
+    .page-details.active {
+      display: block;
+    }
+    .error-list {
+      margin-top: 15px;
+    }
+    .error-item {
+      padding: 12px;
+      background: white;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border-left: 3px solid #dc2626;
+    }
+    .error-type {
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .error-message {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #d73027;
+      word-break: break-word;
+      margin-bottom: 8px;
+    }
+    .error-meta {
+      font-size: 0.8em;
+      color: #666;
+    }
+    .failure-message {
+      padding: 15px;
+      background: #fef3c7;
+      border-radius: 4px;
+      color: #92400e;
+      font-weight: 500;
+    }
+    .no-errors-msg {
       text-align: center;
       padding: 60px 30px;
       color: #666;
     }
-    .no-errors svg {
+    .no-errors-msg svg {
       width: 80px;
       height: 80px;
       margin-bottom: 20px;
       color: #4ade80;
+    }
+    .page-meta {
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -349,120 +402,166 @@ class ConsoleErrorMonitor {
       <h1>🔍 Console Error Monitor Report</h1>
       <div class="meta">
         <div>📅 Generated: ${new Date(timestamp).toLocaleString()}</div>
-        <div>🌐 Total URLs Scanned: ${this.processedUrls.size}</div>
-        <div>⏱️ Next Run: ${new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleString()}</div>
+        <div>🌐 Total Pages Scanned: ${this.processedUrls.size}</div>
+        <div>⚠️ Pages with Errors: ${pagesWithErrors}</div>
       </div>
     </header>
     
     <div class="summary">
       <div class="stat">
-        <div class="stat-number">${this.errors.size}</div>
-        <div class="stat-label">Unique Errors</div>
+        <div class="stat-number">${this.processedUrls.size}</div>
+        <div class="stat-label">Total Pages</div>
       </div>
       <div class="stat">
-        <div class="stat-number">${Array.from(this.errors.values()).reduce((sum, e) => sum + e.count, 0)}</div>
-        <div class="stat-label">Total Occurrences</div>
+        <div class="stat-number">${pagesWithErrors}</div>
+        <div class="stat-label">Pages with Errors</div>
       </div>
       <div class="stat">
-        <div class="stat-number">${this.urlErrors.size}</div>
-        <div class="stat-label">Affected Pages</div>
+        <div class="stat-number">${totalErrors}</div>
+        <div class="stat-label">Total Errors</div>
       </div>
       <div class="stat">
-        <div class="stat-number">${((this.urlErrors.size / this.processedUrls.size) * 100).toFixed(1)}%</div>
+        <div class="stat-number">${((pagesWithErrors / this.processedUrls.size) * 100).toFixed(1)}%</div>
         <div class="stat-label">Error Rate</div>
       </div>
     </div>
     
     <div class="filter-bar">
-      <input type="search" id="searchInput" placeholder="Search errors...">
-      <select id="sortSelect">
-        <option value="count">Sort by Count</option>
-        <option value="urls">Sort by URLs Affected</option>
-        <option value="recent">Sort by Most Recent</option>
+      <input type="search" id="searchInput" placeholder="Search pages or errors...">
+      <select id="filterSelect">
+        <option value="all">All Pages</option>
+        <option value="errors">Pages with Errors</option>
+        <option value="clean">Clean Pages</option>
+        <option value="failed">Failed Pages</option>
       </select>
+      <button id="expandAll">Expand All</button>
+      <button id="collapseAll">Collapse All</button>
     </div>
     
-    <div class="errors">
-      ${sortedErrors.length === 0 ? `
-        <div class="no-errors">
+    <div class="pages">
+      ${sortedPages.length === 0 ? `
+        <div class="no-errors-msg">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <h2>No Errors Found!</h2>
-          <p>All confirmation pages are running without console errors.</p>
+          <h2>No Pages Scanned</h2>
         </div>
-      ` : sortedErrors.map(([key, error], index) => `
-        <div class="error-group" data-error="${key}">
-          <div class="error-header" onclick="toggleDetails(${index})">
-            <div class="error-title">${this.escapeHtml(error.message)}</div>
-            <div class="error-stats">
-              <span class="badge count">${error.count} occurrences</span>
-              <span class="badge urls">${error.urls.size} pages</span>
+      ` : sortedPages.map(([url, pageData], index) => {
+        const cardClass = !pageData.success ? 'failed' : 
+                         pageData.errorCount > 0 ? 'has-errors' : 'no-errors';
+        
+        return `
+        <div class="page-card ${cardClass}" data-url="${url}" data-errors="${pageData.errorCount}">
+          <div class="page-header" onclick="togglePageDetails(${index})">
+            <div class="page-url">${this.escapeHtml(url)}</div>
+            <div class="page-stats">
+              ${!pageData.success ? 
+                `<span class="badge failed">Failed</span>` :
+                pageData.errorCount > 0 ? 
+                `<span class="badge errors">${pageData.errorCount} error${pageData.errorCount !== 1 ? 's' : ''}</span>` :
+                `<span class="badge success">✓ Clean</span>`
+              }
+              ${pageData.errorCount > 0 || !pageData.success ? 
+                `<span class="expand-icon" id="icon-${index}">▼</span>` : ''
+              }
             </div>
           </div>
-          <div class="error-details" id="details-${index}">
-            <strong>First seen:</strong> ${error.firstSeen.toLocaleString()}<br>
-            <strong>Last seen:</strong> ${error.lastSeen.toLocaleString()}<br>
+          ${pageData.errorCount > 0 || !pageData.success ? `
+          <div class="page-details" id="details-${index}">
+            <div class="page-meta">
+              <strong>Scanned:</strong> ${new Date(pageData.scannedAt).toLocaleString()}
+            </div>
             
-            <div class="url-list">
-              <strong>Affected URLs:</strong>
-              ${Array.from(error.urls).map(url => `
-                <div class="url-item">
-                  <a href="${url}" target="_blank" rel="noopener">
-                    ${url}
-                  </a>
-                </div>
-              `).join('')}
-            </div>
+            ${!pageData.success ? `
+              <div class="failure-message">
+                <strong>⚠️ Failed to load page:</strong> ${this.escapeHtml(pageData.failureReason)}
+              </div>
+            ` : pageData.errorCount > 0 ? `
+              <div class="error-list">
+                <strong>Errors Found:</strong>
+                ${pageData.errors.map((error, errIdx) => `
+                  <div class="error-item">
+                    <div class="error-type">${this.escapeHtml(error.type.toUpperCase())}</div>
+                    <div class="error-message">${this.escapeHtml(error.text)}</div>
+                    <div class="error-meta">
+                      ${error.location && error.location.url ? 
+                        `Location: ${this.escapeHtml(error.location.url)}${error.location.lineNumber ? `:${error.location.lineNumber}` : ''}<br>` : 
+                        ''
+                      }
+                      Timestamp: ${new Date(error.timestamp).toLocaleTimeString()}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
           </div>
+          ` : ''}
         </div>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   </div>
   
   <script>
-    function toggleDetails(index) {
+    function togglePageDetails(index) {
       const details = document.getElementById('details-' + index);
-      details.classList.toggle('active');
+      const icon = document.getElementById('icon-' + index);
+      
+      if (details) {
+        details.classList.toggle('active');
+        if (icon) icon.classList.toggle('active');
+      }
     }
     
     // Search functionality
     document.getElementById('searchInput').addEventListener('input', (e) => {
       const searchTerm = e.target.value.toLowerCase();
-      const errorGroups = document.querySelectorAll('.error-group');
+      const pageCards = document.querySelectorAll('.page-card');
       
-      errorGroups.forEach(group => {
-        const errorText = group.dataset.error.toLowerCase();
-        const errorTitle = group.querySelector('.error-title').textContent.toLowerCase();
+      pageCards.forEach(card => {
+        const url = card.dataset.url.toLowerCase();
+        const errorTexts = Array.from(card.querySelectorAll('.error-message'))
+          .map(el => el.textContent.toLowerCase())
+          .join(' ');
         
-        if (errorText.includes(searchTerm) || errorTitle.includes(searchTerm)) {
-          group.style.display = 'block';
+        if (url.includes(searchTerm) || errorTexts.includes(searchTerm)) {
+          card.style.display = 'block';
         } else {
-          group.style.display = 'none';
+          card.style.display = 'none';
         }
       });
     });
     
-    // Sort functionality
-    document.getElementById('sortSelect').addEventListener('change', (e) => {
-      const sortBy = e.target.value;
-      const container = document.querySelector('.errors');
-      const errorGroups = Array.from(document.querySelectorAll('.error-group'));
+    // Filter functionality
+    document.getElementById('filterSelect').addEventListener('change', (e) => {
+      const filter = e.target.value;
+      const pageCards = document.querySelectorAll('.page-card');
       
-      errorGroups.sort((a, b) => {
-        const aCount = parseInt(a.querySelector('.badge.count').textContent);
-        const bCount = parseInt(b.querySelector('.badge.count').textContent);
-        const aUrls = parseInt(a.querySelector('.badge.urls').textContent);
-        const bUrls = parseInt(b.querySelector('.badge.urls').textContent);
+      pageCards.forEach(card => {
+        const hasErrors = parseInt(card.dataset.errors) > 0;
+        const hasFailed = card.classList.contains('failed');
         
-        switch(sortBy) {
-          case 'count': return bCount - aCount;
-          case 'urls': return bUrls - aUrls;
-          default: return 0;
+        let show = false;
+        switch(filter) {
+          case 'all': show = true; break;
+          case 'errors': show = hasErrors && !hasFailed; break;
+          case 'clean': show = !hasErrors && !hasFailed; break;
+          case 'failed': show = hasFailed; break;
         }
+        
+        card.style.display = show ? 'block' : 'none';
       });
-      
-      errorGroups.forEach(group => container.appendChild(group));
+    });
+    
+    // Expand/Collapse all
+    document.getElementById('expandAll').addEventListener('click', () => {
+      document.querySelectorAll('.page-details').forEach(el => el.classList.add('active'));
+      document.querySelectorAll('.expand-icon').forEach(el => el.classList.add('active'));
+    });
+    
+    document.getElementById('collapseAll').addEventListener('click', () => {
+      document.querySelectorAll('.page-details').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.expand-icon').forEach(el => el.classList.remove('active'));
     });
   </script>
 </body>
@@ -471,7 +570,6 @@ class ConsoleErrorMonitor {
     return html;
   }
 
-  // Escape HTML for safe display
   escapeHtml(text) {
     const map = {
       '&': '&amp;',
@@ -483,68 +581,50 @@ class ConsoleErrorMonitor {
     return text.replace(/[&<>"']/g, m => map[m]);
   }
 
-  // Generate JSON report
   async generateJsonReport() {
     const report = {
       timestamp: new Date().toISOString(),
       summary: {
-        totalUrlsScanned: this.processedUrls.size,
-        uniqueErrors: this.errors.size,
-        totalOccurrences: Array.from(this.errors.values()).reduce((sum, e) => sum + e.count, 0),
-        affectedPages: this.urlErrors.size,
-        errorRate: (this.urlErrors.size / this.processedUrls.size) * 100
+        totalPagesScanned: this.processedUrls.size,
+        pagesWithErrors: Array.from(this.pageErrors.values()).filter(p => p.errorCount > 0).length,
+        totalErrors: Array.from(this.pageErrors.values()).reduce((sum, p) => sum + p.errorCount, 0),
+        failedPages: Array.from(this.pageErrors.values()).filter(p => !p.success).length
       },
-      errors: Array.from(this.errors.entries()).map(([key, error]) => ({
-        normalizedKey: key,
-        message: error.message,
-        occurrences: error.count,
-        affectedUrls: Array.from(error.urls),
-        firstSeen: error.firstSeen,
-        lastSeen: error.lastSeen,
-        details: error.details
-      })),
-      urlErrors: Array.from(this.urlErrors.entries()).map(([url, errors]) => ({
+      pages: Array.from(this.pageErrors.entries()).map(([url, pageData]) => ({
         url,
-        errors
+        success: pageData.success,
+        errorCount: pageData.errorCount,
+        scannedAt: pageData.scannedAt,
+        failureReason: pageData.failureReason || null,
+        errors: pageData.errors
       }))
     };
     
     return JSON.stringify(report, null, 2);
   }
 
-  // Main run method
   async run() {
     console.log(`Starting error monitoring run at ${new Date().toISOString()}`);
     
-    // Reset data
-    this.errors.clear();
-    this.urlErrors.clear();
+    this.pageErrors.clear();
     this.processedUrls.clear();
     
-    // Generate URLs to check
-    const urls = await this.generateUrls();  // Add await here
-    
-    // Mark as processed
+    const urls = await this.generateUrls();
     urls.forEach(url => this.processedUrls.add(url));
     
-    // Process all URLs
     const results = await this.processUrls(urls);
     
-    // Generate reports
     await fs.mkdir(this.config.outputDir, { recursive: true });
     
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     
-    // Save HTML report
     const htmlReport = await this.generateHtmlReport();
     const htmlPath = path.join(this.config.outputDir, `error-report-${timestamp}.html`);
     await fs.writeFile(htmlPath, htmlReport);
     
-    // Save latest report
     const latestHtmlPath = path.join(this.config.outputDir, 'latest-report.html');
     await fs.writeFile(latestHtmlPath, htmlReport);
     
-    // Save JSON report
     const jsonReport = await this.generateJsonReport();
     const jsonPath = path.join(this.config.outputDir, `error-report-${timestamp}.json`);
     await fs.writeFile(jsonPath, jsonReport);
@@ -554,25 +634,25 @@ class ConsoleErrorMonitor {
     console.log(`  JSON: ${jsonPath}`);
     console.log(`  Latest: ${latestHtmlPath}`);
     
-    // Log summary
+    const pagesWithErrors = Array.from(this.pageErrors.values()).filter(p => p.errorCount > 0).length;
+    const totalErrors = Array.from(this.pageErrors.values()).reduce((sum, p) => sum + p.errorCount, 0);
+    
     console.log(`\nSummary:`);
-    console.log(`  - Unique errors found: ${this.errors.size}`);
-    console.log(`  - Total occurrences: ${Array.from(this.errors.values()).reduce((sum, e) => sum + e.count, 0)}`);
-    console.log(`  - Affected pages: ${this.urlErrors.size}/${this.processedUrls.size}`);
+    console.log(`  - Pages scanned: ${this.processedUrls.size}`);
+    console.log(`  - Pages with errors: ${pagesWithErrors}`);
+    console.log(`  - Total errors: ${totalErrors}`);
     
     return {
       htmlPath,
       jsonPath,
       summary: {
-        uniqueErrors: this.errors.size,
-        totalOccurrences: Array.from(this.errors.values()).reduce((sum, e) => sum + e.count, 0),
-        affectedPages: this.urlErrors.size
+        pagesScanned: this.processedUrls.size,
+        pagesWithErrors,
+        totalErrors
       }
     };
   }
 
-
-  // Schedule recurring runs
   scheduleRuns() {
     cron.schedule('0 */2 * * *', () => this.run().catch(console.error));
     console.log('Monitoring scheduled every 2 hours');
