@@ -10,7 +10,7 @@ puppeteer.use(StealthPlugin());
 class ConsoleErrorMonitor {
   constructor(config = {}) {
     this.config = {
-      baseUrls: config.baseUrls || ['https://www.salesforce.com'],
+      baseUrls: config.baseUrls || ['https://www-qa1.salesforce.com'],
       maxConcurrent: config.maxConcurrent || 10,
       timeout: config.timeout || 30000,
       outputDir: config.outputDir || './reports',
