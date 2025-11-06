@@ -165,9 +165,12 @@ class ConsoleErrorMonitor {
       });
     
     const totalErrors = sortedPages.reduce((sum, [, page]) => sum + page.errorCount, 0);
-    const pagesWithErrors = sortedPages.filter(([, page]) => page.errorCount > 0).length;
-    // Calculate failed pages for the summary stats
+    
+    // ** UPDATED: Calculate success and fail counts **
     const pagesFailed = sortedPages.filter(([, page]) => !page.success).length;
+    const pagesSuccess = this.processedUrls.size - pagesFailed;
+    // This now specifically means *successful* pages that have errors
+    const pagesWithErrors = sortedPages.filter(([, page]) => page.success && page.errorCount > 0).length;
 
     const html = `
 <!DOCTYPE html>
@@ -208,7 +211,8 @@ class ConsoleErrorMonitor {
     }
     .summary {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      /* ** UPDATED: Added a 5th column for new stats ** */
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 20px;
       padding: 30px;
       background: #fafafa;
@@ -226,9 +230,13 @@ class ConsoleErrorMonitor {
       font-weight: bold;
       color: #667eea;
     }
-    /* Added color for failed stat */
+    /* Added color for failed/error stats */
     .stat-number.failed {
-        color: #d73027; /* Red for failed */
+        color: #d73027; /* Red for failed/errors */
+    }
+    /* ** ADDED: Green color for success stat ** */
+    .stat-number.success {
+        color: #10b981; /* Green */
     }
     .stat-label {
       color: #666;
@@ -278,12 +286,10 @@ class ConsoleErrorMonitor {
       background: #f0fdf4; /* Green */
     }
     .page-card.has-errors {
-      /* CHANGED: Was red, now green to show load success */
       border-color: #d1fae5; /* Green */
       background: #f0fdf4; /* Green */
     }
     .page-card.failed {
-      /* CHANGED: Was orange, now red to show load fail */
       border-color: #fecaca; /* Red */
       background: #fef2f2; /* Red */
     }
@@ -299,11 +305,9 @@ class ConsoleErrorMonitor {
       background: #ecfdf5; /* Green */
     }
     .page-card.has-errors .page-header {
-      /* CHANGED: Was red, now green */
       background: #ecfdf5; /* Green */
     }
     .page-card.failed .page-header {
-      /* CHANGED: Was orange, now red */
       background: #fef2f2; /* Red */
     }
     .page-header:hover {
@@ -337,7 +341,6 @@ class ConsoleErrorMonitor {
       color: #d73027;
     }
     .badge.failed {
-      /* CHANGED: Was orange, now red */
       background: #fee0e0; /* Red */
       color: #d73027; /* Red */
     }
@@ -386,7 +389,6 @@ class ConsoleErrorMonitor {
       color: #666;
     }
     .failure-message {
-      /* CHANGED: Updated color to be more prominent red */
       padding: 15px;
       background: #fef2f2; /* Light red */
       border: 1px solid #fecaca; /* Red border */
@@ -419,8 +421,8 @@ class ConsoleErrorMonitor {
       <div class="meta">
         <div>📅 Generated: ${new Date(timestamp).toLocaleString()}</div>
         <div>🌐 Total Pages Scanned: ${this.processedUrls.size}</div>
-        <div>⚠️ Pages with Errors: ${pagesWithErrors}</div>
-        <div>❌ Pages Failed: ${pagesFailed}</div>
+        <div>✓ Load Success: ${pagesSuccess}</div>
+        <div>❌ Load Fail: ${pagesFailed}</div>
       </div>
     </header>
     
@@ -430,12 +432,16 @@ class ConsoleErrorMonitor {
         <div class="stat-label">Total Pages</div>
       </div>
       <div class="stat">
-        <div class="stat-number">${pagesWithErrors}</div>
-        <div class="stat-label">Pages with Errors</div>
+        <div class="stat-number success">${pagesSuccess}</div>
+        <div class="stat-label">Page Load Success</div>
       </div>
       <div class="stat">
         <div class="stat-number ${pagesFailed > 0 ? 'failed' : ''}">${pagesFailed}</div>
-        <div class="stat-label">Pages Failed</div>
+        <div class="stat-label">Page Load Fail</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number ${pagesWithErrors > 0 ? 'failed' : ''}">${pagesWithErrors}</div>
+        <div class="stat-label">Pages with Errors</div>
       </div>
       <div class="stat">
         <div class="stat-number">${totalErrors}</div>
@@ -464,7 +470,6 @@ class ConsoleErrorMonitor {
           <h2>No Pages Scanned</h2>
         </div>
       ` : sortedPages.map(([url, pageData], index) => {
-        // This logic is now simpler: 'failed' if not success, 'has-errors' if errors, 'no-errors' otherwise
         const cardClass = !pageData.success ? 'failed' : 
                           pageData.errorCount > 0 ? 'has-errors' : 'no-errors';
         
@@ -474,10 +479,17 @@ class ConsoleErrorMonitor {
             <div class="page-url">${this.escapeHtml(url)}</div>
             <div class="page-stats">
               ${!pageData.success ? 
-                `<span class="badge failed">❌ Failed</span>` : // Changed badge text
-                pageData.errorCount > 0 ? 
-                `<span class="badge errors">${pageData.errorCount} error${pageData.errorCount !== 1 ? 's' : ''}</span>` :
-                `<span class="badge success">✓ Clean</span>`
+                // If FAILED: Show only the "Fail" badge
+                `<span class="badge failed">❌ Fail</span>` :
+                
+                // If SUCCESS: Show "Success" badge, and *also* show error badge if errors exist
+                `
+                  <span class="badge success">✓ Success</span>
+                  ${pageData.errorCount > 0 ? 
+                    `<span class="badge errors">${pageData.errorCount} error${pageData.errorCount !== 1 ? 's' : ''}</span>` :
+                    '' // No error badge if clean
+                  }
+                `
               }
               ${pageData.errorCount > 0 || !pageData.success ? 
                 `<span class="expand-icon" id="icon-${index}">▼</span>` : ''
@@ -562,8 +574,11 @@ class ConsoleErrorMonitor {
         let show = false;
         switch(filter) {
           case 'all': show = true; break;
-          case 'errors': show = hasErrors && !hasFailed; break;
-          case 'clean': show = !hasErrors && !hasFailed; break;
+          // ** UPDATED: Filter logic to match new reality **
+          // 'errors' now means success=true AND errors > 0
+          case 'errors': show = !hasFailed && hasErrors; break;
+          // 'clean' now means success=true AND errors === 0
+          case 'clean': show = !hasFailed && !hasErrors; break;
           case 'failed': show = hasFailed; break;
         }
         
@@ -588,7 +603,24 @@ class ConsoleErrorMonitor {
     return html;
   }
 
-// ... (all code after generateHtmlReport remains the same) ...
+// ... (all code after generateHtmlReport, including escapeHtml, remains the same) ...
+
+  // --- THIS IS THE MISSING FUNCTION ---
+  // Ensure this function is inside the ConsoleErrorMonitor class
+  escapeHtml(text) {
+    if (typeof text !== 'string') {
+        return text;
+    }
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+  }
+  // ------------------------------------
 
   async generateJsonReport() {
     const report = {
