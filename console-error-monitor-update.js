@@ -23,7 +23,7 @@ class ConsoleErrorMonitor {
 
   async generateUrls() {
     try {
-      const workbook = XLSX.readFile('./combined_workbook.xlsx');
+      const workbook = XLSX.readFile('./combined_workbook_qa.xlsx');
       const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
       const paths = data
         .map(row => row.path)
