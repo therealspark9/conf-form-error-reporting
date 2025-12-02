@@ -244,6 +244,29 @@ class ConsoleErrorMonitor {
     const pagesFailed = sortedPages.filter(([, page]) => !page.success).length;
     const uniqueErrors = sortedErrorGroups.length;
 
+    // --- NEW: Generate Location Table HTML ---
+    const locationRows = sortedErrorGroups.map(group => `
+      <tr>
+        <td class="table-cell">${this.escapeHtml(group.errorText)}</td>
+        <td class="table-cell">${this.escapeHtml(group.errorLocation)}</td>
+      </tr>
+    `).join('');
+
+    const locationsTable = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="table-header">Error Message</th>
+            <th class="table-header">Error Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${locationRows}
+        </tbody>
+      </table>
+    `;
+    // --- END NEW: Generate Location Table HTML ---
+
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -339,6 +362,38 @@ class ConsoleErrorMonitor {
     .tab-content.active {
       display: block;
     }
+    /* --- NEW STYLES FOR DATAFRAME LAYOUT --- */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+      table-layout: fixed; /* Ensures column widths are stable */
+    }
+    .table-header, .table-cell {
+      border: 1px solid #e0e0e0;
+      padding: 12px 15px;
+      text-align: left;
+      word-wrap: break-word; 
+    }
+    .table-header {
+      background-color: #eef2ff; /* Light blue header */
+      color: #312e81;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      cursor: default;
+    }
+    .data-table tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .data-table tbody tr:hover {
+      background-color: #f0f4ff;
+    }
+    .locations-view-content {
+      padding: 30px;
+      overflow-x: auto; /* Allow horizontal scroll for table on small screens */
+    }
+    /* --- END NEW STYLES --- */
     .filter-bar {
       padding: 20px 30px;
       background: #fafafa;
@@ -605,6 +660,7 @@ class ConsoleErrorMonitor {
     <div class="tabs">
       <button class="tab active" onclick="switchTab('pages')">📄 Pages View</button>
       <button class="tab" onclick="switchTab('errors')">🔗 Errors Grouped View</button>
+      <button class="tab" onclick="switchTab('locations')">📍 Error Locations</button>
     </div>
     
     <!-- Pages View -->
@@ -752,6 +808,26 @@ class ConsoleErrorMonitor {
         `).join('')}
       </div>
     </div>
+    
+    <!-- NEW: Error Locations View -->
+    <div id="locations-view" class="tab-content">
+      <div class="filter-bar">
+        <p class="sort-info">This table lists all unique (Error Message, Error Location) pairs. Use your browser's copy function to extract the data easily.</p>
+      </div>
+      
+      <div class="locations-view-content">
+        ${sortedErrorGroups.length === 0 ? `
+          <div class="no-errors-msg">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2>No Unique Error Locations Found</h2>
+          </div>
+        ` : locationsTable}
+      </div>
+    </div>
+    <!-- END NEW: Error Locations View -->
+    
   </div>
   
   <script>
@@ -761,7 +837,8 @@ class ConsoleErrorMonitor {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       
-      event.target.classList.add('active');
+      // Find the button that was clicked and activate it
+      document.querySelector('.tabs button[onclick="switchTab(\'' + tab + '\')"]').classList.add('active');
       document.getElementById(tab + '-view').classList.add('active');
     }
     
