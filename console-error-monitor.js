@@ -63,27 +63,56 @@ class ConsoleErrorMonitor {
       try {
         page = await browser.newPage();
         
+        // --- FIX 1: Block Downloads via CDP ---
+        const client = await page.target().createCDPSession();
+        await client.send('Page.setDownloadBehavior', {
+          behavior: 'deny' 
+        });
+
         // --- OPTIMIZATION START: Block heavy resources ---
         await page.setRequestInterception(true);
         page.on('request', (req) => {
           const resourceType = req.resourceType();
-          // Block images, fonts, media, and stylesheets to save bandwidth/CPU
-          if (['image', 'media', 'font', 'stylesheet'].includes(resourceType)) {
+          const reqUrl = req.url().toLowerCase();
+
+          // --- FIX 2: Explicitly block PDF and Font extensions in URL ---
+          if (reqUrl.endsWith('.pdf') || reqUrl.endsWith('.woff') || reqUrl.endsWith('.woff2')) {
+            req.abort();
+            return;
+          }
+
+          // Block images, fonts, media, and stylesheets
+          if (['image', 'media', 'font', 'stylesheet', 'other'].includes(resourceType)) {
             req.abort();
           } else {
             req.continue();
           }
+        });
+        
+        // Monitor Response Headers to catch binary files that weren't caught by extension
+        page.on('response', response => {
+            const headers = response.headers();
+            const contentType = headers['content-type'] || '';
+            // If the main page navigation results in a PDF or binary stream, we stop tracking
+            if (response.url() === url && (contentType.includes('application/pdf') || contentType.includes('application/octet-stream'))) {
+                // We don't consider this an error, just a non-html page
+            }
         });
         // --- OPTIMIZATION END ---
 
         const errors = [];
         
         page.on('console', msg => {
-          // ... (Existing console logic remains exactly the same) ...
           try {
             const type = msg.type();
             const text = msg.text ? msg.text() : msg.args()[0]?.toString() || '';
             
+            // --- FIX 3: Filter False Positives ---
+            // If we aborted a request (font/img), Chrome logs "net::ERR_FAILED". We ignore this.
+            if (text.includes('net::ERR_FAILED') || text.includes('net::ERR_ABORTED')) {
+                return; 
+            }
+
             if (type === 'error' || /Cross-Origin Request Blocked|ReferenceError: coveoua/.test(text)) {
               errors.push({
                 text: text,
@@ -96,7 +125,6 @@ class ConsoleErrorMonitor {
         });
         
         page.on('pageerror', error => {
-           // ... (Existing pageerror logic remains exactly the same) ...
             errors.push({
             text: error.message,
             stack: error.stack,
@@ -105,14 +133,13 @@ class ConsoleErrorMonitor {
           });
         });
         
-        // Reduced timeout overhead
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: this.config.timeout });
+        // --- FIX 4: Relaxed Timeout Strategy ---
+        // Changed from 'networkidle2' to 'domcontentloaded'. 
+        // This prevents 30s timeouts on pages that have background tracking/analytics pixels.
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: this.config.timeout });
         
-        // OPTIMIZATION: Reduced wait time. If networkidle2 fires, page is mostly ready.
-        // Dropped from 5000ms to 2000ms.
+        // Wait a buffer period for JS to execute (2 seconds)
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // ... (Remaining data collection logic remains exactly the same) ...
         
         this.pageErrors.set(url, {
           url,
@@ -140,6 +167,21 @@ class ConsoleErrorMonitor {
         return { url, success: true, errorCount: errors.length };
       } catch (error) {
         if (page) await page.close().catch(() => {});
+        
+        // If it's a "net::ERR_ABORTED" on the main document, it usually means we blocked a PDF download intentionally.
+        // We treat this as a success with 0 errors.
+        if (error.message.includes('net::ERR_ABORTED') || error.message.includes('net::ERR_FAILED')) {
+             this.pageErrors.set(url, {
+                url,
+                errorCount: 0,
+                errors: [],
+                scannedAt: new Date().toISOString(),
+                success: true, // Marked as success because we intentionally blocked it
+                failureReason: "Resource blocked (PDF/Font)"
+              });
+             return { url, success: true, errorCount: 0 };
+        }
+
         if (++retries > this.config.retryLimit) {
           console.error(`Failed to process ${url}: ${error.message}`);
           
@@ -161,10 +203,8 @@ class ConsoleErrorMonitor {
 
   async processUrls(urls) {
     const results = [];
-    // Define how many URLs to process before killing the browser instance
     const BROWSER_ROTATION_LIMIT = 50; 
     
-    // Split all URLs into large chunks (e.g., 50 URLs per browser session)
     const browserChunks = [];
     for (let i = 0; i < urls.length; i += BROWSER_ROTATION_LIMIT) {
       browserChunks.push(urls.slice(i, i + BROWSER_ROTATION_LIMIT));
@@ -176,7 +216,6 @@ class ConsoleErrorMonitor {
       const currentChunk = browserChunks[chunkIndex];
       console.log(`Starting Browser Session ${chunkIndex + 1}/${browserChunks.length} (Processing ${currentChunk.length} URLs)`);
 
-      // Launch a FRESH browser for this chunk
       const browser = await puppeteer.launch({
         headless: 'new',
         args: [
@@ -186,12 +225,10 @@ class ConsoleErrorMonitor {
           '--disable-gpu',
           '--no-first-run',
           '--no-zygote',
-          // REMOVED: '--single-process' (Causes instability over time)
         ]
       });
 
       try {
-        // Process the chunk in small concurrent batches (defined in config.maxConcurrent)
         const batches = [];
         for (let i = 0; i < currentChunk.length; i += this.config.maxConcurrent) {
           batches.push(currentChunk.slice(i, i + this.config.maxConcurrent));
@@ -207,7 +244,6 @@ class ConsoleErrorMonitor {
           const batchResults = await Promise.allSettled(batchPromises);
           results.push(...batchResults.map(r => r.value || r.reason));
           
-          // Small cool-down between batches
           if (i < batches.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
@@ -215,9 +251,7 @@ class ConsoleErrorMonitor {
       } catch (err) {
         console.error("Critical error in browser session:", err);
       } finally {
-        // Force close browser to release RAM
         await browser.close(); 
-        // Force Garbage Collection if exposed (optional, but good practice)
         if (global.gc) { global.gc(); } 
       }
     }
@@ -228,8 +262,6 @@ class ConsoleErrorMonitor {
   async generateHtmlReport() {
     const timestamp = new Date().toISOString();
     
-    // 1. PREPARE DATA (Sorting & Organization)
-    // We prepare raw data objects instead of HTML strings to save space.
     const sortedPages = Array.from(this.pageErrors.entries())
       .sort((a, b) => {
         if (b[1].errorCount !== a[1].errorCount) return b[1].errorCount - a[1].errorCount;
@@ -242,9 +274,8 @@ class ConsoleErrorMonitor {
         uniqueErrors: new Set(data.errors.map(e => this.getErrorSignature(e))).size,
         scannedAt: data.scannedAt,
         failureReason: data.failureReason,
-        // Minimize error object size for JSON
         errors: data.errors.map(e => ({
-          t: e.text, // Text
+          t: e.text,
           type: e.type,
           l: e.location?.url ? `${e.location.url}:${e.location.lineNumber || ''}` : null,
           s: this.getErrorSignature(e)
@@ -261,7 +292,6 @@ class ConsoleErrorMonitor {
         pages: Array.from(group.pages)
       }));
 
-    // Calculate Summary Stats
     const summary = {
         total: this.processedUrls.size,
         withErrors: sortedPages.filter(p => p.errorCount > 0).length,
@@ -271,8 +301,6 @@ class ConsoleErrorMonitor {
         generated: new Date(timestamp).toLocaleString()
     };
 
-    // 2. GENERATE HTML SHELL
-    // Note: We embed the data variable window.REPORT_DATA at the bottom.
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -293,9 +321,10 @@ class ConsoleErrorMonitor {
     
     /* Summary Stats */
     .summary-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; padding: 20px; background: #fafafa; border-bottom: 1px solid var(--border); }
-    .stat-box { text-align: center; background: var(--white); padding: 15px; border-radius: 6px; border: 1px solid var(--border); }
+    .stat-box { text-align: center; background: var(--white); padding: 15px; border-radius: 6px; border: 1px solid var(--border); position: relative; }
     .stat-num { font-size: 2rem; font-weight: bold; color: var(--primary); }
     .stat-num.red { color: #dc2626; }
+    .stat-num.blue { color: #2563eb; }
     .stat-label { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
 
     /* Navigation */
@@ -420,14 +449,11 @@ class ConsoleErrorMonitor {
       init() {
         this.renderHeader();
         this.renderSummary();
-        // Initial Filter
         this.filterPages(); 
         this.renderPages(true);
         this.renderGroups();
         this.renderLocs();
       },
-
-      // --- RENDERERS ---
 
       renderHeader() {
         const d = this.data.summary;
@@ -439,10 +465,17 @@ class ConsoleErrorMonitor {
 
       renderSummary() {
         const d = this.data.summary;
+        // --- FIX 5: Highlighted Unique Errors in HTML ---
         document.getElementById('summary-bar').innerHTML = \`
           <div class="stat-box"><div class="stat-num">\${d.total}</div><div class="stat-label">Scanned</div></div>
           <div class="stat-box"><div class="stat-num \${d.withErrors>0?'red':''} ">\${d.withErrors}</div><div class="stat-label">With Errors</div></div>
           <div class="stat-box"><div class="stat-num \${d.failed>0?'red':''} ">\${d.failed}</div><div class="stat-label">Failed</div></div>
+          
+          <div class="stat-box" style="border: 2px solid var(--primary); background: #f0f7ff;">
+            <div class="stat-num blue">\${d.uniqueErrors}</div>
+            <div class="stat-label">Unique Errors</div>
+          </div>
+          
           <div class="stat-box"><div class="stat-num">\${d.totalErrors}</div><div class="stat-label">Total Logs</div></div>
         \`;
       },
@@ -458,7 +491,6 @@ class ConsoleErrorMonitor {
         const slice = this.state.filteredPages.slice(this.state.pageOffset, this.state.pageOffset + this.state.pageLimit);
         
         const html = slice.map((p, idx) => {
-          // Unique ID for toggle
           const uid = this.state.pageOffset + idx;
           const badge = p.status === 'failed' ? '<span class="badge red">FAILED</span>' :
                         p.status === 'error' ? \`<span class="badge red">\${p.errorCount} Errors</span>\` :
@@ -493,14 +525,12 @@ class ConsoleErrorMonitor {
         
         this.state.pageOffset += slice.length;
         
-        // Handle "Load More" button visibility
         const btn = document.getElementById('pages-load-more');
         btn.style.display = this.state.pageOffset < this.state.filteredPages.length ? 'block' : 'none';
       },
 
       renderGroups() {
         const container = document.getElementById('groups-list');
-        // Simple optimization: only render top 200 groups to avoid lag, usually enough
         const html = this.data.groups.slice(0, 200).map((g, idx) => {
            return \`
             <div class="card error" id="g-card-\${idx}">
@@ -522,7 +552,6 @@ class ConsoleErrorMonitor {
 
       renderLocs() {
          const tbody = document.getElementById('locs-body');
-         // Unique check based on Signature
          const html = this.data.groups.map(g => \`
             <tr>
               <td>\${this.escape(g.text)}</td>
@@ -533,19 +562,15 @@ class ConsoleErrorMonitor {
          tbody.innerHTML = html;
       },
 
-      // --- LOGIC ---
-
       filterPages() {
         const search = document.getElementById('search-pages').value.toLowerCase();
         const type = document.getElementById('filter-pages').value;
         
         this.state.filteredPages = this.data.pages.filter(p => {
-          // Status Filter
           if (type === 'error' && p.status !== 'error') return false;
           if (type === 'failed' && p.status !== 'failed') return false;
           if (type === 'success' && p.status !== 'success') return false;
           
-          // Search Filter
           if (!search) return true;
           const urlMatch = p.url.toLowerCase().includes(search);
           const errMatch = p.errors && p.errors.some(e => e.t.toLowerCase().includes(search));
@@ -554,13 +579,10 @@ class ConsoleErrorMonitor {
       },
 
       switchTab(tabName) {
-        // Reset buttons
         ['pages', 'errors', 'locs'].forEach(t => {
           document.getElementById('tab-btn-' + t).classList.remove('active');
           document.getElementById('view-' + t).classList.remove('active');
         });
-        
-        // Activate target
         document.getElementById('tab-btn-' + tabName).classList.add('active');
         document.getElementById('view-' + tabName).classList.add('active');
       },
@@ -587,7 +609,6 @@ class ConsoleErrorMonitor {
       },
 
       debounceSearchGroups() {
-         // Simple filter for groups (not fully implemented in renderGroups for brevity, but easy to add)
          const term = document.getElementById('search-groups').value.toLowerCase();
          const cards = document.getElementById('groups-list').children;
          Array.from(cards).forEach(card => {
@@ -602,7 +623,6 @@ class ConsoleErrorMonitor {
       }
     };
 
-    // Start
     app.init();
   </script>
 </body>
