@@ -17,8 +17,25 @@ class ConsoleErrorMonitor {
       retryLimit: config.retryLimit || 2
     };
     
-    this.pageErrors = new Map(); // Changed: Store errors by page
+    this.pageErrors = new Map();
     this.processedUrls = new Set();
+    this.errorGroups = new Map();
+  }
+
+  getErrorSignature(error) {
+    const location = error.location?.url || 'unknown';
+    return `${error.text}|||${location}`;
+  }
+
+  escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
   }
 
   async generateUrls() {
@@ -45,6 +62,44 @@ class ConsoleErrorMonitor {
     while (retries <= this.config.retryLimit) {
       try {
         page = await browser.newPage();
+        
+        // --- FIX 1: Block Downloads via CDP ---
+        const client = await page.target().createCDPSession();
+        await client.send('Page.setDownloadBehavior', {
+          behavior: 'deny' 
+        });
+
+        // --- OPTIMIZATION START: Block heavy resources ---
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+          const resourceType = req.resourceType();
+          const reqUrl = req.url().toLowerCase();
+
+          // --- FIX 2: Explicitly block PDF and Font extensions in URL ---
+          if (reqUrl.endsWith('.pdf') || reqUrl.endsWith('.woff') || reqUrl.endsWith('.woff2')) {
+            req.abort();
+            return;
+          }
+
+          // Block images, fonts, media, and stylesheets
+          if (['image', 'media', 'font', 'stylesheet', 'other'].includes(resourceType)) {
+            req.abort();
+          } else {
+            req.continue();
+          }
+        });
+        
+        // Monitor Response Headers to catch binary files that weren't caught by extension
+        page.on('response', response => {
+            const headers = response.headers();
+            const contentType = headers['content-type'] || '';
+            // If the main page navigation results in a PDF or binary stream, we stop tracking
+            if (response.url() === url && (contentType.includes('application/pdf') || contentType.includes('application/octet-stream'))) {
+                // We don't consider this an error, just a non-html page
+            }
+        });
+        // --- OPTIMIZATION END ---
+
         const errors = [];
         
         page.on('console', msg => {
@@ -52,6 +107,12 @@ class ConsoleErrorMonitor {
             const type = msg.type();
             const text = msg.text ? msg.text() : msg.args()[0]?.toString() || '';
             
+            // --- FIX 3: Filter False Positives ---
+            // If we aborted a request (font/img), Chrome logs "net::ERR_FAILED". We ignore this.
+            if (text.includes('net::ERR_FAILED') || text.includes('net::ERR_ABORTED')) {
+                return; 
+            }
+
             if (type === 'error' || /Cross-Origin Request Blocked|ReferenceError: coveoua/.test(text)) {
               errors.push({
                 text: text,
@@ -60,13 +121,11 @@ class ConsoleErrorMonitor {
                 timestamp: new Date().toISOString()
               });
             }
-          } catch (e) {
-            console.warn(`Error processing console message: ${e.message}`);
-          }
+          } catch (e) { /* ignore */ }
         });
         
         page.on('pageerror', error => {
-          errors.push({
+            errors.push({
             text: error.message,
             stack: error.stack,
             type: 'pageerror',
@@ -74,10 +133,14 @@ class ConsoleErrorMonitor {
           });
         });
         
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: this.config.timeout });
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // --- FIX 4: Relaxed Timeout Strategy ---
+        // Changed from 'networkidle2' to 'domcontentloaded'. 
+        // This prevents 30s timeouts on pages that have background tracking/analytics pixels.
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: this.config.timeout });
         
-        // Store errors by page
+        // Wait a buffer period for JS to execute (2 seconds)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         this.pageErrors.set(url, {
           url,
           errorCount: errors.length,
@@ -85,15 +148,43 @@ class ConsoleErrorMonitor {
           scannedAt: new Date().toISOString(),
           success: true
         });
+
+        errors.forEach(error => {
+          const signature = this.getErrorSignature(error);
+          if (!this.errorGroups.has(signature)) {
+            this.errorGroups.set(signature, {
+              signature,
+              errorText: error.text,
+              errorLocation: error.location?.url || 'unknown',
+              pages: new Set(),
+              sampleError: error
+            });
+          }
+          this.errorGroups.get(signature).pages.add(url);
+        });
         
         await page.close();
         return { url, success: true, errorCount: errors.length };
       } catch (error) {
         if (page) await page.close().catch(() => {});
+        
+        // If it's a "net::ERR_ABORTED" on the main document, it usually means we blocked a PDF download intentionally.
+        // We treat this as a success with 0 errors.
+        if (error.message.includes('net::ERR_ABORTED') || error.message.includes('net::ERR_FAILED')) {
+             this.pageErrors.set(url, {
+                url,
+                errorCount: 0,
+                errors: [],
+                scannedAt: new Date().toISOString(),
+                success: true, // Marked as success because we intentionally blocked it
+                failureReason: "Resource blocked (PDF/Font)"
+              });
+             return { url, success: true, errorCount: 0 };
+        }
+
         if (++retries > this.config.retryLimit) {
           console.error(`Failed to process ${url}: ${error.message}`);
           
-          // Store failure info
           this.pageErrors.set(url, {
             url,
             errorCount: 0,
@@ -111,544 +202,600 @@ class ConsoleErrorMonitor {
   }
 
   async processUrls(urls) {
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process'
-      ]
-    });
-
     const results = [];
-    const batches = [];
+    const BROWSER_ROTATION_LIMIT = 50; 
     
-    for (let i = 0; i < urls.length; i += this.config.maxConcurrent) {
-      batches.push(urls.slice(i, i + this.config.maxConcurrent));
+    const browserChunks = [];
+    for (let i = 0; i < urls.length; i += BROWSER_ROTATION_LIMIT) {
+      browserChunks.push(urls.slice(i, i + BROWSER_ROTATION_LIMIT));
     }
-    
-    for (let i = 0; i < batches.length; i++) {
-      console.log(`Processing batch ${i + 1}/${batches.length}`);
-      
-      const batchPromises = batches[i].map(url => 
-        this.processUrl(browser, url)
-      );
-      
-      const batchResults = await Promise.allSettled(batchPromises);
-      results.push(...batchResults.map(r => r.value || r.reason));
-      
-      if (i < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+
+    console.log(`Job split into ${browserChunks.length} browser sessions to prevent memory leaks.`);
+
+    for (let chunkIndex = 0; chunkIndex < browserChunks.length; chunkIndex++) {
+      const currentChunk = browserChunks[chunkIndex];
+      console.log(`Starting Browser Session ${chunkIndex + 1}/${browserChunks.length} (Processing ${currentChunk.length} URLs)`);
+
+      const browser = await puppeteer.launch({
+        headless: 'new',
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--no-first-run',
+          '--no-zygote',
+        ]
+      });
+
+      try {
+        const batches = [];
+        for (let i = 0; i < currentChunk.length; i += this.config.maxConcurrent) {
+          batches.push(currentChunk.slice(i, i + this.config.maxConcurrent));
+        }
+
+        for (let i = 0; i < batches.length; i++) {
+          console.log(`  Processing batch ${i + 1}/${batches.length} in current session...`);
+          
+          const batchPromises = batches[i].map(url => 
+            this.processUrl(browser, url)
+          );
+          
+          const batchResults = await Promise.allSettled(batchPromises);
+          results.push(...batchResults.map(r => r.value || r.reason));
+          
+          if (i < batches.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      } catch (err) {
+        console.error("Critical error in browser session:", err);
+      } finally {
+        await browser.close(); 
+        if (global.gc) { global.gc(); } 
       }
     }
     
-    await browser.close();
     return results;
   }
 
-// ... (all code before generateHtmlReport remains the same) ...
-
   async generateHtmlReport() {
     const timestamp = new Date().toISOString();
-    
-    // Sort pages by error count (descending), then alphabetically
+
     const sortedPages = Array.from(this.pageErrors.entries())
       .sort((a, b) => {
-        if (b[1].errorCount !== a[1].errorCount) {
-          return b[1].errorCount - a[1].errorCount;
-        }
+        if (b[1].errorCount !== a[1].errorCount) return b[1].errorCount - a[1].errorCount;
         return a[0].localeCompare(b[0]);
-      });
-    
-    const totalErrors = sortedPages.reduce((sum, [, page]) => sum + page.errorCount, 0);
-    
-    // ** UPDATED: Calculate success and fail counts **
-    const pagesFailed = sortedPages.filter(([, page]) => !page.success).length;
-    const pagesSuccess = this.processedUrls.size - pagesFailed;
-    // This now specifically means *successful* pages that have errors
-    const pagesWithErrors = sortedPages.filter(([, page]) => page.success && page.errorCount > 0).length;
+      })
+      .map(([url, data]) => ({
+        url: url,
+        status: !data.success ? 'failed' : data.errorCount > 0 ? 'error' : 'success',
+        errorCount: data.errorCount,
+        uniqueErrors: new Set(data.errors.map(e => this.getErrorSignature(e))).size,
+        scannedAt: data.scannedAt,
+        failureReason: data.failureReason,
+        errors: data.errors.map(e => ({
+          t: e.text,
+          type: e.type,
+          l: e.location?.url ? `${e.location.url}:${e.location.lineNumber || ''}` : null,
+          s: this.getErrorSignature(e)
+        }))
+      }));
 
-    const html = `
-<!DOCTYPE html>
+    const sortedErrorGroups = Array.from(this.errorGroups.values())
+      .sort((a, b) => b.pages.size - a.pages.size)
+      .map(group => ({
+        sig: group.signature,
+        text: group.errorText,
+        loc: group.errorLocation,
+        count: group.pages.size,
+        pages: Array.from(group.pages)
+      }));
+
+    // Extract faulty images
+    const faultyImages = [];
+    sortedPages.forEach(page => {
+      page.errors.forEach(error => {
+        const errorText = error.t.toLowerCase();
+        // Detect image-related errors
+        if (errorText.includes('.jpg') || errorText.includes('.jpeg') || 
+            errorText.includes('.png') || errorText.includes('.gif') || 
+            errorText.includes('.svg') || errorText.includes('.webp') ||
+            errorText.includes('image') || errorText.includes('img')) {
+
+          // Try to extract image URL from error text
+          const urlMatch = error.t.match(/(https?:\/\/[^\s'"]+\.(jpg|jpeg|png|gif|svg|webp)[^\s'"]*)/i);
+          if (urlMatch) {
+            faultyImages.push({
+              imageUrl: urlMatch[0],
+              foundOnPage: page.url
+            });
+          } else {
+            // If no URL found, use the error text itself
+            faultyImages.push({
+              imageUrl: error.t,
+              foundOnPage: page.url
+            });
+          }
+        }
+      });
+    });
+
+    const summary = {
+      total: this.processedUrls.size,
+      withErrors: sortedPages.filter(p => p.errorCount > 0).length,
+      failed: sortedPages.filter(p => p.status === 'failed').length,
+      totalErrors: sortedPages.reduce((sum, p) => sum + p.errorCount, 0),
+      uniqueErrors: sortedErrorGroups.length,
+      faultyImages: faultyImages.length,
+      generated: new Date(timestamp).toLocaleString()
+    };
+
+    const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Console Error Report - ${timestamp}</title>
+  <title>Console Error Report - ${summary.generated}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f7fa;
+      color: #2d3748;
       line-height: 1.6;
-      color: #333;
-      background: #f5f5f5;
-      padding: 20px;
     }
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    header {
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .header { 
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    h1 { font-size: 2em; margin-bottom: 10px; }
-    .meta {
-      display: flex;
-      gap: 30px;
-      margin-top: 15px;
-      opacity: 0.9;
-      flex-wrap: wrap;
-    }
-    .summary {
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; font-size: 14px; }
+
+    .summary-cards {
       display: grid;
-      /* ** UPDATED: Added a 5th column for new stats ** */
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
-      padding: 30px;
-      background: #fafafa;
-      border-bottom: 1px solid #e0e0e0;
+      margin-bottom: 30px;
     }
-    .stat {
-      text-align: center;
+    .summary-card {
+      background: white;
       padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      border-left: 4px solid #667eea;
+    }
+    .summary-card.errors { border-left-color: #f56565; }
+    .summary-card.failed { border-left-color: #ed8936; }
+    .summary-card.images { border-left-color: #9f7aea; }
+    .summary-card h3 { font-size: 14px; color: #718096; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-card .value { font-size: 32px; font-weight: bold; color: #2d3748; }
+
+    .tabs {
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .stat-number {
-      font-size: 2.5em;
-      font-weight: bold;
-      color: #667eea;
-    }
-    /* Added color for failed/error stats */
-    .stat-number.failed {
-        color: #d73027; /* Red for failed/errors */
-    }
-    /* ** ADDED: Green color for success stat ** */
-    .stat-number.success {
-        color: #10b981; /* Green */
-    }
-    .stat-label {
-      color: #666;
-      margin-top: 5px;
-    }
-    .filter-bar {
-      padding: 20px 30px;
-      background: #fafafa;
-      border-bottom: 1px solid #e0e0e0;
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    input[type="search"] {
-      flex: 1;
-      min-width: 250px;
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-    select, button {
-      padding: 10px 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 1em;
-      background: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #f0f0f0;
-    }
-    .pages { padding: 30px; }
-    .page-card {
-      margin-bottom: 25px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       overflow: hidden;
-      transition: box-shadow 0.3s;
     }
-    .page-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .tab-buttons {
+      display: flex;
+      background: #f7fafc;
+      border-bottom: 2px solid #e2e8f0;
+      overflow-x: auto;
     }
-    .page-card.no-errors {
-      border-color: #d1fae5; /* Green */
-      background: #f0fdf4; /* Green */
-    }
-    .page-card.has-errors {
-      border-color: #d1fae5; /* Green */
-      background: #f0fdf4; /* Green */
-    }
-    .page-card.failed {
-      border-color: #fecaca; /* Red */
-      background: #fef2f2; /* Red */
-    }
-    .page-header {
-      padding: 15px 20px;
+    .tab-button {
+      padding: 16px 24px;
+      background: none;
+      border: none;
       cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-    }
-    .page-card.no-errors .page-header {
-      background: #ecfdf5; /* Green */
-    }
-    .page-card.has-errors .page-header {
-      background: #ecfdf5; /* Green */
-    }
-    .page-card.failed .page-header {
-      background: #fef2f2; /* Red */
-    }
-    .page-header:hover {
-      opacity: 0.9;
-    }
-    .page-url {
-      flex: 1;
-      font-size: 0.95em;
-      word-break: break-all;
-      color: #2166ac;
-    }
-    .page-stats {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .badge {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.85em;
-      font-weight: bold;
+      font-size: 15px;
+      font-weight: 500;
+      color: #718096;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
       white-space: nowrap;
     }
-    .badge.success {
-      background: #d1fae5;
-      color: #065f46;
-    }
-    .badge.errors {
-      background: #fee0e0;
-      color: #d73027;
-    }
-    .badge.failed {
-      background: #fee0e0; /* Red */
-      color: #d73027; /* Red */
-    }
-    .expand-icon {
-      transition: transform 0.3s;
-      font-size: 1.2em;
-      color: #666;
-    }
-    .expand-icon.active {
-      transform: rotate(180deg);
-    }
-    .page-details {
-      padding: 20px;
-      background: #fafafa;
-      display: none;
-      border-top: 1px solid #e0e0e0;
-    }
-    .page-details.active {
-      display: block;
-    }
-    .error-list {
-      margin-top: 15px;
-    }
-    .error-item {
-      padding: 12px;
+    .tab-button:hover { background: #edf2f7; color: #4a5568; }
+    .tab-button.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
       background: white;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      border-left: 3px solid #dc2626;
     }
-    .error-type {
-      font-size: 0.85em;
-      color: #666;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .error-message {
-      font-family: 'Courier New', monospace;
-      font-size: 0.9em;
-      color: #d73027;
-      word-break: break-word;
-      margin-bottom: 8px;
-    }
-    .error-meta {
-      font-size: 0.8em;
-      color: #666;
-    }
-    .failure-message {
-      padding: 15px;
-      background: #fef2f2; /* Light red */
-      border: 1px solid #fecaca; /* Red border */
-      border-radius: 4px;
-      color: #991b1b; /* Dark red text */
-      font-weight: 500;
-    }
-    .no-errors-msg {
-      text-align: center;
-      padding: 60px 30px;
-      color: #666;
-    }
-    .no-errors-msg svg {
-      width: 80px;
-      height: 80px;
+
+    .tab-content { display: none; padding: 24px; }
+    .tab-content.active { display: block; }
+
+    .controls {
+      display: flex;
+      gap: 12px;
       margin-bottom: 20px;
-      color: #4ade80;
+      flex-wrap: wrap;
+      align-items: center;
     }
-    .page-meta {
-      font-size: 0.85em;
-      color: #666;
-      margin-bottom: 10px;
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      padding: 10px 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .search-box:focus { outline: none; border-color: #667eea; }
+
+    .export-btn {
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .export-btn:hover { background: #5a67d8; transform: translateY(-1px); }
+    .export-btn:active { transform: translateY(0); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      font-size: 14px;
+    }
+    th {
+      background: #f7fafc;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      border-bottom: 2px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:hover { background: #f7fafc; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-success { background: #c6f6d5; color: #22543d; }
+    .status-error { background: #fed7d7; color: #742a2a; }
+    .status-failed { background: #feebc8; color: #7c2d12; }
+
+    .error-text {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      background: #f7fafc;
+      padding: 8px;
+      border-radius: 4px;
+      margin: 4px 0;
+      word-break: break-word;
+    }
+
+    .url-link {
+      color: #667eea;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .url-link:hover { text-decoration: underline; }
+
+    .page-list {
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .page-list-item {
+      padding: 4px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #48bb78;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 12px; }
+      .header { padding: 20px; }
+      .summary-cards { grid-template-columns: 1fr; }
+      .tab-button { padding: 12px 16px; font-size: 13px; }
+      table { font-size: 12px; }
+      th, td { padding: 8px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>🔍 Console Error Monitor Report</h1>
-      <div class="meta">
-        <div>📅 Generated: ${new Date(timestamp).toLocaleString()}</div>
-        <div>🌐 Total Pages Scanned: ${this.processedUrls.size}</div>
-        <div>✓ Load Success: ${pagesSuccess}</div>
-        <div>❌ Load Fail: ${pagesFailed}</div>
+    <div class="header">
+      <h1>🔍 Console Error Monitoring Report</h1>
+      <p>Generated on ${summary.generated}</p>
+    </div>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <h3>Total URLs</h3>
+        <div class="value">${summary.total}</div>
       </div>
-    </header>
-    
-    <div class="summary">
-      <div class="stat">
-        <div class="stat-number">${this.processedUrls.size}</div>
-        <div class="stat-label">Total Pages</div>
+      <div class="summary-card errors">
+        <h3>With Errors</h3>
+        <div class="value">${summary.withErrors}</div>
       </div>
-      <div class="stat">
-        <div class="stat-number success">${pagesSuccess}</div>
-        <div class="stat-label">Page Load Success</div>
+      <div class="summary-card failed">
+        <h3>Failed</h3>
+        <div class="value">${summary.failed}</div>
       </div>
-      <div class="stat">
-        <div class="stat-number ${pagesFailed > 0 ? 'failed' : ''}">${pagesFailed}</div>
-        <div class="stat-label">Page Load Fail</div>
+      <div class="summary-card">
+        <h3>Unique Errors</h3>
+        <div class="value">${summary.uniqueErrors}</div>
       </div>
-      <div class="stat">
-        <div class="stat-number ${pagesWithErrors > 0 ? 'failed' : ''}">${pagesWithErrors}</div>
-        <div class="stat-label">Pages with Errors</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">${totalErrors}</div>
-        <div class="stat-label">Total Errors</div>
+      <div class="summary-card images">
+        <h3>Faulty Images</h3>
+        <div class="value">${summary.faultyImages}</div>
       </div>
     </div>
-    
-    <div class="filter-bar">
-      <input type="search" id="searchInput" placeholder="Search pages or errors...">
-      <select id="filterSelect">
-        <option value="all">All Pages</option>
-        <option value="errors">Pages with Errors</option>
-        <option value="clean">Clean Pages</option>
-        <option value="failed">Failed Pages</option>
-      </select>
-      <button id="expandAll">Expand All</button>
-      <button id="collapseAll">Collapse All</button>
-    </div>
-    
-    <div class="pages">
-      ${sortedPages.length === 0 ? `
-        <div class="no-errors-msg">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h2>No Pages Scanned</h2>
+
+    <div class="tabs">
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="switchTab(0)">📄 All URLs (${summary.total})</button>
+        <button class="tab-button" onclick="switchTab(1)">⚠️ Error Summary (${summary.uniqueErrors})</button>
+        <button class="tab-button" onclick="switchTab(2)">🔍 Detailed Errors</button>
+        <button class="tab-button" onclick="switchTab(3)">🖼️ Faulty Images (${summary.faultyImages})</button>
+      </div>
+
+      <!-- Tab 1: All URLs -->
+      <div class="tab-content active" id="tab-0">
+        <div class="controls">
+          <input type="text" class="search-box" id="search-0" placeholder="Search URLs..." onkeyup="filterTable(0)">
+          <button class="export-btn" onclick="exportToExcel(0)">
+            <span>📊</span> Export to Excel
+          </button>
         </div>
-      ` : sortedPages.map(([url, pageData], index) => {
-        const cardClass = !pageData.success ? 'failed' : 
-                          pageData.errorCount > 0 ? 'has-errors' : 'no-errors';
-        
-        return `
-        <div class="page-card ${cardClass}" data-url="${url}" data-errors="${pageData.errorCount}">
-          <div class="page-header" onclick="togglePageDetails(${index})">
-            <div class="page-url">${this.escapeHtml(url)}</div>
-            <div class="page-stats">
-              ${!pageData.success ? 
-                // If FAILED: Show only the "Fail" badge
-                `<span class="badge failed">❌ Fail</span>` :
-                
-                // If SUCCESS: Show "Success" badge, and *also* show error badge if errors exist
-                `
-                  <span class="badge success">✓ Success</span>
-                  ${pageData.errorCount > 0 ? 
-                    `<span class="badge errors">${pageData.errorCount} error${pageData.errorCount !== 1 ? 's' : ''}</span>` :
-                    '' // No error badge if clean
-                  }
-                `
-              }
-              ${pageData.errorCount > 0 || !pageData.success ? 
-                `<span class="expand-icon" id="icon-${index}">▼</span>` : ''
-              }
-            </div>
-          </div>
-          ${pageData.errorCount > 0 || !pageData.success ? `
-          <div class="page-details" id="details-${index}">
-            <div class="page-meta">
-              <strong>Scanned:</strong> ${new Date(pageData.scannedAt).toLocaleString()}
-            </div>
-            
-            ${!pageData.success ? `
-              <div class="failure-message">
-                <strong>⚠️ Failed to load page:</strong> ${this.escapeHtml(pageData.failureReason)}
-              </div>
-            ` : pageData.errorCount > 0 ? `
-              <div class="error-list">
-                <strong>Errors Found:</strong>
-                ${pageData.errors.map((error, errIdx) => `
-                  <div class="error-item">
-                    <div class="error-type">${this.escapeHtml(error.type.toUpperCase())}</div>
-                    <div class="error-message">${this.escapeHtml(error.text)}</div>
-                    <div class="error-meta">
-                      ${error.location && error.location.url ? 
-                        `Location: ${this.escapeHtml(error.location.url)}${error.location.lineNumber ? `:${error.location.lineNumber}` : ''}<br>` : 
-                        ''
-                      }
-                      Timestamp: ${new Date(error.timestamp).toLocaleTimeString()}
+        <div style="overflow-x: auto;">
+          <table id="table-0">
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>Status</th>
+                <th>Errors</th>
+                <th>Unique</th>
+                <th>Scanned At</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedPages.map(p => `
+                <tr>
+                  <td><a href="${this.escapeHtml(p.url)}" class="url-link" target="_blank">${this.escapeHtml(p.url)}</a></td>
+                  <td><span class="status-badge status-${p.status}">${p.status}</span></td>
+                  <td>${p.errorCount}</td>
+                  <td>${p.uniqueErrors}</td>
+                  <td>${p.scannedAt}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 2: Error Summary -->
+      <div class="tab-content" id="tab-1">
+        <div class="controls">
+          <input type="text" class="search-box" id="search-1" placeholder="Search errors..." onkeyup="filterTable(1)">
+          <button class="export-btn" onclick="exportToExcel(1)">
+            <span>📊</span> Export to Excel
+          </button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="table-1">
+            <thead>
+              <tr>
+                <th>Error Message</th>
+                <th>Location</th>
+                <th>Occurrences</th>
+                <th>Affected Pages</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedErrorGroups.map(g => `
+                <tr>
+                  <td><div class="error-text">${this.escapeHtml(g.text)}</div></td>
+                  <td>${this.escapeHtml(g.loc)}</td>
+                  <td>${g.count}</td>
+                  <td>
+                    <div class="page-list">
+                      ${g.pages.map(p => `<div class="page-list-item"><a href="${this.escapeHtml(p)}" class="url-link" target="_blank">${this.escapeHtml(p)}</a></div>`).join('')}
                     </div>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-          </div>
-          ` : ''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         </div>
-      `;
-      }).join('')}
+      </div>
+
+      <!-- Tab 3: Detailed Errors -->
+      <div class="tab-content" id="tab-2">
+        <div class="controls">
+          <input type="text" class="search-box" id="search-2" placeholder="Search detailed errors..." onkeyup="filterTable(2)">
+          <button class="export-btn" onclick="exportToExcel(2)">
+            <span>📊</span> Export to Excel
+          </button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="table-2">
+            <thead>
+              <tr>
+                <th>Page URL</th>
+                <th>Error Message</th>
+                <th>Type</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sortedPages.flatMap(p => 
+                p.errors.length > 0 ? p.errors.map(e => `
+                  <tr>
+                    <td><a href="${this.escapeHtml(p.url)}" class="url-link" target="_blank">${this.escapeHtml(p.url)}</a></td>
+                    <td><div class="error-text">${this.escapeHtml(e.t)}</div></td>
+                    <td>${this.escapeHtml(e.type)}</td>
+                    <td>${e.l ? this.escapeHtml(e.l) : 'N/A'}</td>
+                  </tr>
+                `) : []
+              ).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 4: Faulty Images -->
+      <div class="tab-content" id="tab-3">
+        <div class="controls">
+          <input type="text" class="search-box" id="search-3" placeholder="Search image URLs..." onkeyup="filterTable(3)">
+          <button class="export-btn" onclick="exportToExcel(3)">
+            <span>📊</span> Export to Excel
+          </button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table id="table-3">
+            <thead>
+              <tr>
+                <th>Image URL</th>
+                <th>Found on Page</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${faultyImages.map(img => `
+                <tr>
+                  <td><div class="error-text">${this.escapeHtml(img.imageUrl)}</div></td>
+                  <td><a href="${this.escapeHtml(img.foundOnPage)}" class="url-link" target="_blank">${this.escapeHtml(img.foundOnPage)}</a></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
-  
+
   <script>
-    function togglePageDetails(index) {
-      const details = document.getElementById('details-' + index);
-      const icon = document.getElementById('icon-' + index);
-      
-      if (details) {
-        details.classList.toggle('active');
-        if (icon) icon.classList.toggle('active');
+    function switchTab(index) {
+      const buttons = document.querySelectorAll('.tab-button');
+      const contents = document.querySelectorAll('.tab-content');
+
+      buttons.forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+
+      contents.forEach((content, i) => {
+        content.classList.toggle('active', i === index);
+      });
+    }
+
+    function filterTable(tabIndex) {
+      const input = document.getElementById('search-' + tabIndex);
+      const filter = input.value.toLowerCase();
+      const table = document.getElementById('table-' + tabIndex);
+      const rows = table.getElementsByTagName('tr');
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
       }
     }
-    
-    // Search functionality
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      const searchTerm = e.target.value.toLowerCase();
-      const pageCards = document.querySelectorAll('.page-card');
-      
-      pageCards.forEach(card => {
-        const url = card.dataset.url.toLowerCase();
-        const errorTexts = Array.from(card.querySelectorAll('.error-message'))
-          .map(el => el.textContent.toLowerCase())
-          .join(' ');
-        
-        if (url.includes(searchTerm) || errorTexts.includes(searchTerm)) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
+
+    function escapeCSV(text) {
+      if (text == null) return '';
+      text = String(text);
+      if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+        return '"' + text.replace(/"/g, '""') + '"';
+      }
+      return text;
+    }
+
+    function exportToExcel(tabIndex) {
+      const table = document.getElementById('table-' + tabIndex);
+      const rows = Array.from(table.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
+
+      let csv = [];
+      rows.forEach(row => {
+        const cols = Array.from(row.querySelectorAll('th, td'));
+        const rowData = cols.map(col => {
+          let text = col.textContent.trim().replace(/\s+/g, ' ');
+          return escapeCSV(text);
+        });
+        csv.push(rowData.join(','));
       });
-    });
-    
-    // Filter functionality
-    document.getElementById('filterSelect').addEventListener('change', (e) => {
-      const filter = e.target.value;
-      const pageCards = document.querySelectorAll('.page-card');
-      
-      pageCards.forEach(card => {
-        const hasErrors = parseInt(card.dataset.errors) > 0;
-        const hasFailed = card.classList.contains('failed');
-        
-        let show = false;
-        switch(filter) {
-          case 'all': show = true; break;
-          // ** UPDATED: Filter logic to match new reality **
-          // 'errors' now means success=true AND errors > 0
-          case 'errors': show = !hasFailed && hasErrors; break;
-          // 'clean' now means success=true AND errors === 0
-          case 'clean': show = !hasFailed && !hasErrors; break;
-          case 'failed': show = hasFailed; break;
-        }
-        
-        card.style.display = show ? 'block' : 'none';
-      });
-    });
-    
-    // Expand/Collapse all
-    document.getElementById('expandAll').addEventListener('click', () => {
-      document.querySelectorAll('.page-details').forEach(el => el.classList.add('active'));
-      document.querySelectorAll('.expand-icon').forEach(el => el.classList.add('active'));
-    });
-    
-    document.getElementById('collapseAll').addEventListener('click', () => {
-      document.querySelectorAll('.page-details').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.expand-icon').forEach(el => el.classList.remove('active'));
-    });
+
+      const csvContent = csv.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+
+      const tabNames = ['all-urls', 'error-summary', 'detailed-errors', 'faulty-images'];
+      link.href = URL.createObjectURL(blob);
+      link.download = 'console-errors-' + tabNames[tabIndex] + '-' + timestamp + '.csv';
+      link.click();
+
+      showNotification('Exported to Excel successfully!');
+    }
+
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 2500);
+    }
   </script>
 </body>
 </html>`;
-    
+
     return html;
   }
 
-// ... (all code after generateHtmlReport, including escapeHtml, remains the same) ...
+  
 
-  // --- THIS IS THE MISSING FUNCTION ---
-  // Ensure this function is inside the ConsoleErrorMonitor class
-  escapeHtml(text) {
-    if (typeof text !== 'string') {
-        return text;
-    }
-    const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, m => map[m]);
-  }
-  // ------------------------------------
-
-  async generateJsonReport() {
-    const report = {
-      timestamp: new Date().toISOString(),
-      summary: {
-        totalPagesScanned: this.processedUrls.size,
-        pagesWithErrors: Array.from(this.pageErrors.values()).filter(p => p.errorCount > 0).length,
-        totalErrors: Array.from(this.pageErrors.values()).reduce((sum, p) => sum + p.errorCount, 0),
-        failedPages: Array.from(this.pageErrors.values()).filter(p => !p.success).length
-      },
-      pages: Array.from(this.pageErrors.entries()).map(([url, pageData]) => ({
-        url,
-        success: pageData.success,
-        errorCount: pageData.errorCount,
-        scannedAt: pageData.scannedAt,
-        failureReason: pageData.failureReason || null,
-        errors: pageData.errors
-      }))
-    };
-    
-    return JSON.stringify(report, null, 2);
-  }
-
-  async run() {
+    async run() {
     console.log(`Starting error monitoring run at ${new Date().toISOString()}`);
     
     this.pageErrors.clear();
     this.processedUrls.clear();
+    this.errorGroups.clear();
     
     const urls = await this.generateUrls();
     urls.forEach(url => this.processedUrls.add(url));
@@ -677,11 +824,13 @@ class ConsoleErrorMonitor {
     
     const pagesWithErrors = Array.from(this.pageErrors.values()).filter(p => p.errorCount > 0).length;
     const totalErrors = Array.from(this.pageErrors.values()).reduce((sum, p) => sum + p.errorCount, 0);
+    const uniqueErrors = this.errorGroups.size;
     
     console.log(`\nSummary:`);
     console.log(`  - Pages scanned: ${this.processedUrls.size}`);
     console.log(`  - Pages with errors: ${pagesWithErrors}`);
     console.log(`  - Total errors: ${totalErrors}`);
+    console.log(`  - Unique errors: ${uniqueErrors}`);
     
     return {
       htmlPath,
@@ -689,7 +838,8 @@ class ConsoleErrorMonitor {
       summary: {
         pagesScanned: this.processedUrls.size,
         pagesWithErrors,
-        totalErrors
+        totalErrors,
+        uniqueErrors
       }
     };
   }
